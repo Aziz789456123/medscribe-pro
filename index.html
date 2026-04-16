@@ -1021,18 +1021,15 @@ async function generateReport(){
   document.getElementById('r-chip').className='chip chip-amber';
   document.getElementById('r-chip').textContent='Génération…';
 
-  const prompt=`Tu es un assistant médical expert francophone. Génère un compte-rendu médical structuré UNIQUEMENT à partir de ce que le médecin a dit dans sa dictée. Ne rajoute RIEN qui n'est pas dans la dictée. Si une information n'est pas mentionnée, écris "Non renseigné".
+  const prompt=`Tu es un médecin assistant qui rédige des comptes-rendus médicaux en français.
 
-Patient : ${name} — ${age} ans — ${sex} — né(e) le ${dob}
-Antécédents déclarés : ${histo}
-Type de consultation : ${type}
-
-DICTÉE EXACTE DU MÉDECIN (base-toi UNIQUEMENT sur ce texte) :
+Voici la dictée du médecin :
 "${liveTranscript}"
 
-Réponds UNIQUEMENT en JSON valide, sans backticks, sans markdown, sans texte avant ou après. Clés exactes :
-{"motif":"...","anamnese":"...","examen":"...","conclusion":"...","traitement":"...","suivi":"..."}`;
+Informations patient : ${name}, ${age} ans, ${sex}, consultation de ${type}.
 
+Rédige un compte-rendu structuré en JSON. Réponds SEULEMENT avec ce JSON, rien d'autre, pas de backticks :
+{"motif":"résume le motif de consultation en 1 phrase","anamnese":"décris l'histoire de la maladie et les symptômes","examen":"décris les données de l'examen clinique mentionnées","conclusion":"donne le diagnostic retenu","traitement":"liste les prescriptions et traitements","suivi":"indique les recommandations de suivi"}`;
   try{
     const res=await fetch('/api/generate',{
       method:'POST',
