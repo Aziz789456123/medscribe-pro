@@ -1202,7 +1202,103 @@ function copyReport(){
 
 function printReport(){ window.print(); }
 
-function exportPDF(){ toast('Export PDF — fonctionnalité disponible en version complète'); }
+function exportPDF(){
+  // Gather all report data
+  const sections = document.querySelectorAll('.rsection');
+  const meta = document.getElementById('report-meta')?.innerHTML || '';
+  let sectionsHTML = '';
+  sections.forEach(s => {
+    const label = s.querySelector('.rsection-label')?.textContent?.trim() || '';
+    const body = s.querySelector('.rsection-body')?.textContent?.trim() || '';
+    sectionsHTML += `
+      <div style="margin-bottom:20px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#666;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #e0e0e0;">${label}</div>
+        <div style="font-size:13px;line-height:1.7;color:#1a1a1a;">${body}</div>
+      </div>`;
+  });
+
+  const today = new Date().toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'});
+  const patientName = document.getElementById('f-name')?.value || 'Patient';
+  const patientAge = document.getElementById('f-age')?.value || '';
+  const consultType = document.getElementById('f-type')?.value || '';
+
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Compte-rendu — ${patientName}</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Georgia', serif; color: #1a1a1a; background: white; padding: 40px; max-width: 800px; margin: 0 auto; }
+  .header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:20px; border-bottom:2px solid #1a1a1a; margin-bottom:28px; }
+  .header-left h1 { font-size:22px; font-weight:700; letter-spacing:-0.5px; }
+  .header-left p { font-size:12px; color:#666; margin-top:4px; }
+  .header-right { text-align:right; font-size:12px; color:#666; }
+  .patient-bar { background:#f5f5f5; border-radius:6px; padding:12px 16px; margin-bottom:28px; display:flex; gap:20px; font-size:13px; }
+  .patient-bar strong { font-weight:600; }
+  .section { margin-bottom:22px; }
+  .section-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:#888; margin-bottom:7px; padding-bottom:5px; border-bottom:1px solid #e8e8e8; }
+  .section-body { font-size:13px; line-height:1.75; color:#1a1a1a; }
+  .section-body.diag { border-left:3px solid #e53e3e; padding-left:12px; background:#fff5f5; padding:10px 12px; border-radius:0 4px 4px 0; }
+  .section-body.traitement { border-left:3px solid #38a169; padding-left:12px; background:#f0fff4; padding:10px 12px; border-radius:0 4px 4px 0; }
+  .footer { margin-top:40px; padding-top:16px; border-top:1px solid #e0e0e0; display:flex; justify-content:space-between; font-size:11px; color:#999; }
+  .signature { margin-top:40px; text-align:right; }
+  .signature-line { width:200px; border-top:1px solid #1a1a1a; margin-left:auto; margin-bottom:6px; }
+  @media print { body { padding:20px; } }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <h1>Compte-rendu médical</h1>
+      <p>${consultType}</p>
+    </div>
+    <div class="header-right">
+      <div>Date : ${today}</div>
+      <div style="margin-top:4px;font-weight:600;">MedScribe Pro</div>
+    </div>
+  </div>
+
+  <div class="patient-bar">
+    <span><strong>Patient :</strong> ${patientName}</span>
+    ${patientAge ? `<span><strong>Âge :</strong> ${patientAge} ans</span>` : ''}
+    <span><strong>Spécialité :</strong> ${consultType}</span>
+  </div>
+
+  ${[
+    {key:'motif', label:'Motif de consultation', cls:''},
+    {key:'anamnese', label:'Anamnèse', cls:''},
+    {key:'examen', label:'Examen clinique', cls:''},
+    {key:'conclusion', label:'Conclusion diagnostique', cls:'diag'},
+    {key:'traitement', label:'Traitement & prescriptions', cls:'traitement'},
+    {key:'suivi', label:'Suivi & recommandations', cls:''}
+  ].map(s => {
+    const el = document.getElementById('rb-'+s.key);
+    const text = el ? el.textContent.trim() : '';
+    return `<div class="section">
+      <div class="section-label">${s.label}</div>
+      <div class="section-body ${s.cls}">${text}</div>
+    </div>`;
+  }).join('')}
+
+  <div class="signature">
+    <div class="signature-line"></div>
+    <div style="font-size:12px;color:#666;">Signature du médecin</div>
+  </div>
+
+  <div class="footer">
+    <span>Document généré par MedScribe Pro</span>
+    <span>${today}</span>
+  </div>
+
+  <script>window.onload=()=>{window.print();}<\/script>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+}
 
 function newConsult(){
   clearForm();
