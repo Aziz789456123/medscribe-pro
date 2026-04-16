@@ -1035,7 +1035,22 @@ async function generateReport(){
     try{
       const clean=raw.replace(/```json|```/g,'').trim();
       const match=clean.match(/\{[\s\S]*\}/);
-      report=JSON.parse(match?match[0]:clean);
+      const parsed=JSON.parse(match?match[0]:clean);
+      // Normalize — convert any object values to readable text
+      const normalize=(val)=>{
+        if(!val) return 'Non renseigné';
+        if(typeof val==='string') return val;
+        if(typeof val==='object') return Object.entries(val).map(([k,v])=>`${k} : ${v}`).join('\n');
+        return String(val);
+      };
+      report={
+        motif: normalize(parsed.motif),
+        anamnese: normalize(parsed.anamnese),
+        examen: normalize(parsed.examen),
+        conclusion: normalize(parsed.conclusion),
+        traitement: normalize(parsed.traitement),
+        suivi: normalize(parsed.suivi)
+      };
     }catch{
       report=structureTranscript(liveTranscript,name,age,sex,type,histo);
     }
