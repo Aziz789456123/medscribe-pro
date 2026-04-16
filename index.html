@@ -662,35 +662,40 @@ body::before{
         </div>
       </div>
 
-      <!-- Doctor Profile -->
+      <!-- Doctor Profile - collapsible -->
       <div id="doctor-profile-section">
-        <div class="section-head">
+        <div class="section-head" onclick="toggleProfile()" style="cursor:pointer">
           <span class="section-title">Profil médecin</span>
-          <span class="section-action" onclick="saveDoctorProfile()">Sauvegarder</span>
+          <span class="section-action" id="profile-toggle">▼ Modifier</span>
         </div>
-        <div class="field-grid" style="margin-bottom:10px">
-          <div class="field">
-            <label>Nom du médecin</label>
-            <input type="text" id="doc-name" placeholder="Dr. Mohamed Zaanoun">
+        <div id="profile-fields" style="display:none">
+          <div class="field-grid" style="margin-bottom:10px">
+            <div class="field">
+              <label>Nom du médecin</label>
+              <input type="text" id="doc-name" placeholder="Dr. Mohamed Zaanoun">
+            </div>
+            <div class="field">
+              <label>Spécialité</label>
+              <input type="text" id="doc-spec" placeholder="Médecine générale">
+            </div>
           </div>
-          <div class="field">
-            <label>Spécialité</label>
-            <input type="text" id="doc-spec" placeholder="Médecine générale">
+          <div class="field-grid" style="margin-bottom:10px">
+            <div class="field">
+              <label>Téléphone</label>
+              <input type="text" id="doc-tel" placeholder="+216 XX XXX XXX">
+            </div>
+            <div class="field">
+              <label>N° RPPS / INPE</label>
+              <input type="text" id="doc-rpps" placeholder="XXXXXXXXXX">
+            </div>
           </div>
-        </div>
-        <div class="field-grid" style="margin-bottom:10px">
-          <div class="field">
-            <label>Téléphone</label>
-            <input type="text" id="doc-tel" placeholder="+216 XX XXX XXX">
+          <div class="field" style="margin-bottom:10px">
+            <label>Adresse cabinet</label>
+            <input type="text" id="doc-address" placeholder="123 rue de la Santé, Tunis">
           </div>
-          <div class="field">
-            <label>N° RPPS / INPE</label>
-            <input type="text" id="doc-rpps" placeholder="XXXXXXXXXX">
-          </div>
-        </div>
-        <div class="field" style="margin-bottom:10px">
-          <label>Adresse cabinet</label>
-          <input type="text" id="doc-address" placeholder="123 rue de la Santé, Tunis">
+          <button class="btn-generate" style="height:36px;font-size:12px;margin-bottom:0" onclick="saveDoctorProfile()">
+            Sauvegarder le profil
+          </button>
         </div>
       </div>
 
@@ -1564,6 +1569,18 @@ function exportOrdonnance(){
   const win=window.open('','_blank');
   win.document.write(html);
   win.document.close();
+}
+
+function toggleProfile(){
+  const fields=document.getElementById('profile-fields');
+  const toggle=document.getElementById('profile-toggle');
+  if(fields.style.display==='none'){
+    fields.style.display='block';
+    toggle.textContent='▲ Fermer';
+  } else {
+    fields.style.display='none';
+    toggle.textContent='▼ Modifier';
+  }
 }
 
 function saveDoctorProfile(){
