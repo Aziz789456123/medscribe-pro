@@ -1021,20 +1021,11 @@ async function generateReport(){
   document.getElementById('r-chip').className='chip chip-amber';
   document.getElementById('r-chip').textContent='Génération…';
 
-  const prompt=`Tu es un médecin assistant qui rédige des comptes-rendus médicaux en français.
-
-Voici la dictée du médecin :
-"${liveTranscript}"
-
-Informations patient : ${name}, ${age} ans, ${sex}, consultation de ${type}.
-
-Rédige un compte-rendu structuré en JSON. Réponds SEULEMENT avec ce JSON, rien d'autre, pas de backticks :
-{"motif":"résume le motif de consultation en 1 phrase","anamnese":"décris l'histoire de la maladie et les symptômes","examen":"décris les données de l'examen clinique mentionnées","conclusion":"donne le diagnostic retenu","traitement":"liste les prescriptions et traitements","suivi":"indique les recommandations de suivi"}`;
   try{
     const res=await fetch('/api/generate',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prompt})
+      body:JSON.stringify({transcript:liveTranscript,name,age,sex,type})
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
     const data=await res.json();
