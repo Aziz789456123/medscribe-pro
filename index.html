@@ -795,13 +795,13 @@ body::before{
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 9V2.5A1.5 1.5 0 013.5 1H9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
           Copier
         </button>
-        <button class="btn-sm" onclick="printReport()">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="4.5" width="10" height="6" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 4.5V2.5A1 1 0 014.5 1.5h4a1 1 0 011 1v2M4.5 7.5h4M4.5 9.5h2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-          Imprimer
-        </button>
         <button class="btn-sm" onclick="exportPDF()">
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2h7l3 3v6.5A1.5 1.5 0 0110.5 13h-8A1.5 1.5 0 011 11.5v-8A1.5 1.5 0 012 2z" stroke="currentColor" stroke-width="1.2"/><path d="M8 2v4h4M4.5 8h4M4.5 10h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-          Export PDF
+          Compte-rendu PDF
+        </button>
+        <button class="btn-sm" style="background:rgba(16,185,129,0.15);color:#10b981;border-color:rgba(16,185,129,0.3)" onclick="exportOrdonnance()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2h7l3 3v6.5A1.5 1.5 0 0110.5 13h-8A1.5 1.5 0 011 11.5v-8A1.5 1.5 0 012 2z" stroke="currentColor" stroke-width="1.2"/><path d="M4 6h5M4 8.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          Ordonnance
         </button>
         <button class="btn-sm primary" onclick="newConsult()">
           Nouveau
@@ -1389,6 +1389,103 @@ function exportPDF(){
 </html>`;
 
   const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+}
+
+function exportOrdonnance(){
+  const patientName = document.getElementById('f-name')?.value || 'Patient';
+  const patientAge  = document.getElementById('f-age')?.value  || '';
+  const patientDob  = document.getElementById('f-dob')?.value  || '';
+  const consultType = document.getElementById('f-type')?.value || 'Médecine générale';
+  const traitement  = document.getElementById('rb-traitement')?.textContent?.trim() || 'Non renseigné';
+  const today = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  const num = 'ORD-'+Date.now().toString().slice(-6);
+
+  // Format traitement as numbered list
+  const lines = traitement.split(/[.\n;]/).map(l=>l.trim()).filter(l=>l.length>3);
+  const rxItems = lines.map((l,i)=>`
+    <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #eef0f5;align-items:flex-start">
+      <div style="width:22px;height:22px;border-radius:50%;background:#1c2333;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">${i+1}</div>
+      <div style="font-size:14px;line-height:1.6;color:#1c2333">${l}</div>
+    </div>`).join('');
+
+  const html=`<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Ordonnance — ${patientName}</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'DM Sans',sans-serif;background:#fff;color:#1c2333;width:210mm;min-height:297mm}
+  .page{width:210mm;min-height:297mm;padding:14mm 16mm 12mm;display:flex;flex-direction:column}
+  .header{display:flex;justify-content:space-between;padding-bottom:14px;border-bottom:3px solid #1c2333;margin-bottom:20px}
+  .doctor-name{font-family:'EB Garamond',serif;font-size:24px;font-weight:600;letter-spacing:-0.3px}
+  .doctor-detail{font-size:11px;color:#5a6478;margin-top:3px}
+  .doc-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#8a93a8;text-align:right}
+  .doc-date{font-size:13px;font-weight:600;color:#1c2333;margin-top:4px;text-align:right}
+  .patient-box{background:#f4f6fb;border-radius:8px;padding:12px 16px;margin-bottom:24px;display:flex;gap:24px}
+  .patient-field label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#8a93a8;display:block;margin-bottom:2px}
+  .patient-field span{font-size:13px;font-weight:600;color:#1c2333}
+  .rx-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+  .rx-symbol{font-family:'EB Garamond',serif;font-size:52px;font-weight:600;color:#1c2333;line-height:1}
+  .rx-sub{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#5a6478}
+  .rx-items{flex:1;margin-bottom:24px}
+  .footer{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;padding-top:20px;border-top:1px solid #e8ebf2}
+  .sig-line{width:200px;border-top:1.5px solid #1c2333;margin-bottom:6px}
+  .sig-label{font-size:10px;color:#8a93a8}
+  .stamp-box{width:110px;height:110px;border:1.5px dashed #c8cdd8;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#c8cdd8;text-align:center;line-height:1.5}
+  .footer-note{font-size:9px;color:#c8cdd8;text-align:center;margin-top:20px;font-style:italic}
+  @media print{body,html{width:210mm;height:297mm}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div>
+      <div class="doctor-name">Dr. Mohamed-Aziz Zaanoun</div>
+      <div class="doctor-detail">${consultType} • Tunis, Tunisie</div>
+      <div class="doctor-detail" style="margin-top:2px">Tél : +216 XX XXX XXX • N° RPPS : XXXXXXXXXX</div>
+    </div>
+    <div>
+      <div class="doc-label">Ordonnance médicale</div>
+      <div class="doc-date">${today}</div>
+      <div style="font-size:10px;color:#aab0bc;text-align:right;margin-top:2px">Réf. ${num}</div>
+    </div>
+  </div>
+
+  <div class="patient-box">
+    <div class="patient-field"><label>Patient</label><span>${patientName}</span></div>
+    ${patientAge?`<div class="patient-field"><label>Âge</label><span>${patientAge} ans</span></div>`:''}
+    ${patientDob?`<div class="patient-field"><label>Né(e) le</label><span>${patientDob}</span></div>`:''}
+    <div class="patient-field"><label>Date</label><span>${today}</span></div>
+  </div>
+
+  <div class="rx-header">
+    <div class="rx-symbol">℞</div>
+    <div><div class="rx-sub">Prescriptions médicales</div><div style="font-size:12px;color:#8a93a8;margin-top:2px">À délivrer en pharmacie sur présentation de cette ordonnance</div></div>
+  </div>
+
+  <div class="rx-items">
+    ${rxItems || `<div style="font-size:14px;color:#5a6478;padding:16px 0">Aucune prescription renseignée</div>`}
+  </div>
+
+  <div class="footer">
+    <div>
+      <div class="sig-line"></div>
+      <div class="sig-label">Signature du médecin</div>
+    </div>
+    <div class="stamp-box">Cachet<br>du médecin</div>
+  </div>
+
+  <div class="footer-note">Ordonnance valable 3 mois à compter de la date de prescription • Document médical confidentiel</div>
+</div>
+<script>window.onload=()=>{window.print();}<\/script>
+</body>
+</html>`;
+
+  const win=window.open('','_blank');
   win.document.write(html);
   win.document.close();
 }
