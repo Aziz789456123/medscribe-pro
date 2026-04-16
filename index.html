@@ -881,25 +881,36 @@ function startRec(){
     toast('Web Speech non supporté — utilisez Chrome ou Edge');
     return;
   }
-  transcript=''; interimText='';
-  document.getElementById('transcript-text').textContent='';
-  document.getElementById('transcript-wrap').classList.remove('show');
-  document.getElementById('gen-btn').disabled=true;
-
-  recog=buildRecognition();
-  try{ recog.start(); }catch(e){ toast('Impossible de démarrer le micro'); return; }
-
-  isRec=true; seconds=0;
-  document.getElementById('mode-label').textContent='Micro actif ✓';
-  setRecState('recording');
-  document.getElementById('rec-timer').style.display='block';
-  timerInt=setInterval(()=>{
-    seconds++;
-    const m=String(Math.floor(seconds/60)).padStart(2,'0');
-    const s=String(seconds%60).padStart(2,'0');
-    document.getElementById('rec-timer').textContent=`${m}:${s}`;
-  },1000);
-  waveInt=setInterval(animWave,90);
+  // Request mic permission explicitly first
+  navigator.mediaDevices.getUserMedia({audio:true})
+  .then(stream=>{
+    stream.getTracks().forEach(t=>t.stop()); // release immediately
+    transcript=''; interimText='';
+    document.getElementById('transcript-text').textContent='';
+    document.getElementById('transcript-wrap').classList.remove('show');
+    document.getElementById('gen-btn').disabled=true;
+    recog=buildRecognition();
+    try{
+      recog.start();
+      isRec=true; seconds=0;
+      document.getElementById('mode-label').textContent='Micro actif ✓';
+      setRecState('recording');
+      document.getElementById('rec-timer').style.display='block';
+      timerInt=setInterval(()=>{
+        seconds++;
+        const m=String(Math.floor(seconds/60)).padStart(2,'0');
+        const s=String(seconds%60).padStart(2,'0');
+        document.getElementById('rec-timer').textContent=`${m}:${s}`;
+      },1000);
+      waveInt=setInterval(animWave,90);
+    }catch(e){
+      toast('Erreur micro : '+e.message);
+    }
+  })
+  .catch(err=>{
+    toast('Micro refusé : '+err.message+' — autorisez le micro dans Chrome');
+    document.getElementById('mode-label').textContent='Micro refusé';
+  });
 }
 
 function stopRec(){
