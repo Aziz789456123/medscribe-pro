@@ -1033,9 +1033,31 @@ DICTÉE EXACTE DU MÉDECIN (base-toi UNIQUEMENT sur ce texte) :
 Réponds UNIQUEMENT en JSON valide, sans backticks, sans markdown, sans texte avant ou après. Clés exactes :
 {"motif":"...","anamnese":"...","examen":"...","conclusion":"...","traitement":"...","suivi":"..."}`;
 
-  // Smart local processing — no API needed
-  const report = structureTranscript(liveTranscript, name, age, sex, type, histo);
-  for(const s of sections) await stream('rb-'+s.key, report[s.key]||'Non renseigné');
+  try{
+    const res=await fetch('/api/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt})
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    if(data.error) throw new Error(data.error);
+    const raw=data.text||'{}';
+    let report;
+    try{
+      const clean=raw.replace(/```json|```/g,'').trim();
+      const match=clean.match(/\{[\s\S]*\}/);
+      report=JSON.parse(match?match[0]:clean);
+    }catch{
+      report=structureTranscript(liveTranscript,name,age,sex,type,histo);
+    }
+    for(const s of sections) await stream('rb-'+s.key, report[s.key]||'Non renseigné');
+  }catch(e){
+    console.error(e);
+    // Fallback: smart local processing
+    const report=structureTranscript(liveTranscript,name,age,sex,type,histo);
+    for(const s of sections) await stream('rb-'+s.key, report[s.key]||'Non renseigné');
+  }
 
   btn.classList.remove('loading');
   btn.innerHTML=`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8h14M10 3l5 5-5 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Générer le compte-rendu IA`;
