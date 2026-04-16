@@ -662,6 +662,38 @@ body::before{
         </div>
       </div>
 
+      <!-- Doctor Profile -->
+      <div id="doctor-profile-section">
+        <div class="section-head">
+          <span class="section-title">Profil médecin</span>
+          <span class="section-action" onclick="saveDoctorProfile()">Sauvegarder</span>
+        </div>
+        <div class="field-grid" style="margin-bottom:10px">
+          <div class="field">
+            <label>Nom du médecin</label>
+            <input type="text" id="doc-name" placeholder="Dr. Mohamed Zaanoun">
+          </div>
+          <div class="field">
+            <label>Spécialité</label>
+            <input type="text" id="doc-spec" placeholder="Médecine générale">
+          </div>
+        </div>
+        <div class="field-grid" style="margin-bottom:10px">
+          <div class="field">
+            <label>Téléphone</label>
+            <input type="text" id="doc-tel" placeholder="+216 XX XXX XXX">
+          </div>
+          <div class="field">
+            <label>N° RPPS / INPE</label>
+            <input type="text" id="doc-rpps" placeholder="XXXXXXXXXX">
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:10px">
+          <label>Adresse cabinet</label>
+          <input type="text" id="doc-address" placeholder="123 rue de la Santé, Tunis">
+        </div>
+      </div>
+
       <!-- Patient -->
       <div>
         <div class="section-head">
@@ -704,6 +736,26 @@ body::before{
               <option value="">—</option>
               <option>Masculin</option>
               <option>Féminin</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-grid" style="margin-bottom:10px">
+          <div class="field">
+            <label>Langue du compte-rendu</label>
+            <select id="f-lang">
+              <option value="fr">🇫🇷 Français</option>
+              <option value="ar">🇹🇳 Arabe</option>
+              <option value="en">🇬🇧 Anglais</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Modèle</label>
+            <select id="f-template">
+              <option value="standard">Standard</option>
+              <option value="cardio">Cardiologie</option>
+              <option value="dermato">Dermatologie</option>
+              <option value="pediatrie">Pédiatrie</option>
+              <option value="urgences">Urgences</option>
             </select>
           </div>
         </div>
@@ -829,6 +881,9 @@ const now = new Date();
 document.getElementById('topbar-date').textContent =
   now.toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
 
+// Load saved doctor profile
+loadDoctorProfile();
+
 // ── STATE ──
 let isRec=false, recog=null, timerInt=null, waveInt=null;
 let seconds=0, transcript='', reportCount=0, history=[];
@@ -839,7 +894,9 @@ function buildRecognition(){
   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SpeechRecognition) return null;
   const r=new SpeechRecognition();
-  r.lang='fr-FR';
+  const langMap={'fr':'fr-FR','ar':'ar-TN','en':'en-US'};
+  const selectedLang=document.getElementById('f-lang')?.value||'fr';
+  r.lang=langMap[selectedLang]||'fr-FR';
   r.continuous=true;
   r.interimResults=true;
   r.maxAlternatives=1;
@@ -981,6 +1038,9 @@ async function generateReport(){
   const dob=document.getElementById('f-dob').value||'—';
   const histo=document.getElementById('f-history').value||'Aucun antécédent renseigné';
 
+  const lang=document.getElementById('f-lang')?.value||'fr';
+  const template=document.getElementById('f-template')?.value||'standard';
+
   const btn=document.getElementById('gen-btn');
   btn.classList.add('loading');
   btn.innerHTML='<div class="spin"></div> Analyse en cours…';
@@ -996,6 +1056,10 @@ async function generateReport(){
       <span class="meta-pill">${sex}</span>
       <span class="meta-pill">${type}</span>
       <span class="meta-pill">${today}</span>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:6px">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Cliquez sur n'importe quelle section pour la modifier
     </div>
     <div id="sections-container"></div>
   `;
@@ -1014,7 +1078,7 @@ async function generateReport(){
     const d=document.createElement('div');
     d.className='rsection';d.id='rs-'+s.key;
     d.style.transitionDelay=(i*0.07)+'s';
-    d.innerHTML=`<div class="rsection-label">${s.label}</div><div class="rsection-body ${s.accent}" id="rb-${s.key}"><span class="cursor"></span></div>`;
+    d.innerHTML=`<div class="rsection-label">${s.label}</div><div class="rsection-body ${s.accent}" id="rb-${s.key}" contenteditable="true" style="outline:none;cursor:text" title="Cliquez pour modifier"><span class="cursor"></span></div>`;
     cont.appendChild(d);
     setTimeout(()=>d.classList.add('visible'),i*70);
   });
@@ -1026,7 +1090,7 @@ async function generateReport(){
     const res=await fetch('/api/generate',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({transcript:liveTranscript,name,age,sex,type})
+      body:JSON.stringify({transcript:liveTranscript,name,age,sex,type,lang,template})
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
     const data=await res.json();
@@ -1204,11 +1268,17 @@ function copyReport(){
 function printReport(){ window.print(); }
 
 function exportPDF(){
+  const doc = getDoctorProfile();
   const patientName = document.getElementById('f-name')?.value || 'Patient';
   const patientAge  = document.getElementById('f-age')?.value  || '';
   const patientDob  = document.getElementById('f-dob')?.value  || '';
   const patientSex  = document.getElementById('f-sex')?.value  || '';
   const consultType = document.getElementById('f-type')?.value || 'Médecine générale';
+  const docName = doc.name || 'Dr. Mohamed-Aziz Zaanoun';
+  const docSpec = doc.spec || consultType;
+  const docTel  = doc.tel  || '+216 XX XXX XXX';
+  const docRpps = doc.rpps || 'XXXXXXXXXX';
+  const docAddr = doc.addr || 'Tunis, Tunisie';
 
   const get = id => { const el=document.getElementById('rb-'+id); return el?el.textContent.trim():''; };
   const motif      = get('motif');
@@ -1289,12 +1359,12 @@ function exportPDF(){
   <!-- HEADER -->
   <div class="header">
     <div class="doctor-info">
-      <div class="doctor-name">Dr. Mohamed-Aziz Zaanoun</div>
-      <div class="doctor-spec">${consultType}</div>
+      <div class="doctor-name">${docName}</div>
+      <div class="doctor-spec">${docSpec}</div>
       <div class="doctor-contact">
-        Cabinet médical • Tunis, Tunisie<br>
-        Tél : +216 XX XXX XXX<br>
-        N° RPPS : XXXXXXXXXX
+        ${docAddr}<br>
+        Tél : ${docTel}<br>
+        N° RPPS : ${docRpps}
       </div>
     </div>
     <div class="header-right">
@@ -1394,6 +1464,12 @@ function exportPDF(){
 }
 
 function exportOrdonnance(){
+  const doc = getDoctorProfile();
+  const docName = doc.name || 'Dr. Mohamed-Aziz Zaanoun';
+  const docSpec = doc.spec || 'Médecine générale';
+  const docTel  = doc.tel  || '+216 XX XXX XXX';
+  const docRpps = doc.rpps || 'XXXXXXXXXX';
+  const docAddr = doc.addr || 'Tunis, Tunisie';
   const patientName = document.getElementById('f-name')?.value || 'Patient';
   const patientAge  = document.getElementById('f-age')?.value  || '';
   const patientDob  = document.getElementById('f-dob')?.value  || '';
@@ -1444,9 +1520,9 @@ function exportOrdonnance(){
 <div class="page">
   <div class="header">
     <div>
-      <div class="doctor-name">Dr. Mohamed-Aziz Zaanoun</div>
-      <div class="doctor-detail">${consultType} • Tunis, Tunisie</div>
-      <div class="doctor-detail" style="margin-top:2px">Tél : +216 XX XXX XXX • N° RPPS : XXXXXXXXXX</div>
+      <div class="doctor-name">${docName}</div>
+      <div class="doctor-detail">${docSpec} • ${docAddr}</div>
+      <div class="doctor-detail" style="margin-top:2px">Tél : ${docTel} • N° RPPS : ${docRpps}</div>
     </div>
     <div>
       <div class="doc-label">Ordonnance médicale</div>
@@ -1488,6 +1564,34 @@ function exportOrdonnance(){
   const win=window.open('','_blank');
   win.document.write(html);
   win.document.close();
+}
+
+function saveDoctorProfile(){
+  const profile={
+    name: document.getElementById('doc-name')?.value||'',
+    spec: document.getElementById('doc-spec')?.value||'',
+    tel:  document.getElementById('doc-tel')?.value||'',
+    rpps: document.getElementById('doc-rpps')?.value||'',
+    addr: document.getElementById('doc-address')?.value||''
+  };
+  localStorage.setItem('doctorProfile', JSON.stringify(profile));
+  toast('Profil médecin sauvegardé ✓');
+}
+
+function loadDoctorProfile(){
+  try{
+    const p=JSON.parse(localStorage.getItem('doctorProfile')||'{}');
+    if(p.name) document.getElementById('doc-name').value=p.name;
+    if(p.spec) document.getElementById('doc-spec').value=p.spec;
+    if(p.tel)  document.getElementById('doc-tel').value=p.tel;
+    if(p.rpps) document.getElementById('doc-rpps').value=p.rpps;
+    if(p.addr) document.getElementById('doc-address').value=p.addr;
+  }catch{}
+}
+
+function getDoctorProfile(){
+  try{ return JSON.parse(localStorage.getItem('doctorProfile')||'{}'); }
+  catch{ return {}; }
 }
 
 function newConsult(){
