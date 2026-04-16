@@ -2,30 +2,40 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { transcript, name, age, sex, type } = req.body;
+  const { transcript, name, age, sex, type, lang, template } = req.body;
   if (!transcript) return res.status(400).json({ error: 'Missing transcript' });
 
   const GROQ_KEY = process.env.GROQ_API_KEY;
   if (!GROQ_KEY) return res.status(500).json({ error: 'API key not configured' });
 
-  const prompt = `Tu es un secrétaire médical. Tu dois retranscrire UNIQUEMENT ce que le médecin a dit. Tu n'inventes RIEN. Tu n'ajoutes AUCUNE information médicale supplémentaire. Si une information n'est pas dans la dictée, tu écris exactement "Non mentionné".
+  // Language instructions
+  const langMap = {
+    fr: 'Réponds en français.',
+    ar: 'Réponds en arabe (العربية). Utilise la terminologie médicale arabe standard.',
+    en: 'Reply in English. Use standard medical English terminology.'
+  };
+  const langInstr = langMap[lang] || langMap.fr;
 
-DICTÉE DU MÉDECIN :
-"${transcript}"
+  // Template-specific sections
+  const templateMap = {
+    cardio: 'Pour la cardiologie, inclure dans examen : fréquence cardiaque, tension artérielle, auscultation cardiaque, pouls périphériques, signes d\'insuffisance cardiaque.',
+    dermato: 'Pour la dermatologie, inclure dans examen : description des lésions (type, taille, couleur, localisation, évolution), atteinte muqueuse.',
+    pediatrie: 'Pour la pédiatrie, inclure dans examen : poids, taille, périmètre crânien, développement psychomoteur, vaccinations.',
+    urgences: 'Pour les urgences, inclure : score de triage, constantes vitales complètes, orientation (hospitalisation/sortie).',
+    standard: ''
+  };
+  const templateInstr = templateMap[template] || '';
 
-Retranscris cette dictée en JSON avec ces 6 clés. Reste STRICTEMENT fidèle aux mots du médecin :
-- motif : ce que le médecin dit comme motif de consultation
-- anamnese : les symptômes et antécédents mentionnés
-- examen : les éléments d'examen clinique mentionnés (sinon "Non mentionné")
-- conclusion : le diagnostic mentionné
-- traitement : les traitements et prescriptions mentionnés
-- suivi : les recommandations de suivi mentionnées
+  const prompt = `Tu es un secrétaire médical. Retranscris UNIQUEMENT ce que le médecin a dit. N'invente RIEN. Si une information n'est pas dans la dictée, écris "Non mentionné". ${langInstr} ${templateInstr}
 
-RÈGLE ABSOLUE : N'écris que ce qui est dans la dictée. Pas de "il est probable que", pas de "éventuellement", pas d'inventions.`;
+DICTÉE : "${transcript}"
+Patient : ${name || '?'}, ${age || '?'} ans, ${sex || '?'}, ${type || 'médecine générale'}
+
+JSON avec ces 6 clés exactes (rien d'autre) :
+{"motif":"...","anamnese":"...","examen":"...","conclusion":"...","traitement":"...","suivi":"..."}`;
 
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -51,9 +61,7 @@ RÈGLE ABSOLUE : N'écris que ce qui est dans la dictée. Pas de "il est probabl
     const data = await response.json();
     const text = data.choices?.[0]?.message?.content || '{}';
     return res.status(200).json({ text });
-
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
 }
-
