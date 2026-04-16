@@ -4,569 +4,178 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedScribe Pro</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#0a0c0f;
-  --bg2:#0f1217;
-  --bg3:#141820;
-  --bg4:#1a2030;
-  --border:#232a38;
-  --border2:#2e3848;
-  --text:#e8ecf4;
-  --text2:#8a95a8;
-  --text3:#4a5468;
-  --blue:#3b82f6;
-  --blue2:#1d4ed8;
-  --blue-glow:rgba(59,130,246,0.15);
-  --green:#10b981;
-  --green-glow:rgba(16,185,129,0.12);
-  --red:#f43f5e;
-  --red-glow:rgba(244,63,94,0.15);
-  --amber:#f59e0b;
-  --r:8px;
-  --r2:12px;
+  --bg:#0a0c0f;--bg2:#0f1217;--bg3:#141820;--bg4:#1a2030;
+  --border:#232a38;--border2:#2e3848;
+  --text:#e8ecf4;--text2:#8a95a8;--text3:#4a5468;
+  --blue:#3b82f6;--blue2:#1d4ed8;--blue-glow:rgba(59,130,246,0.15);
+  --green:#10b981;--green-glow:rgba(16,185,129,0.12);
+  --red:#f43f5e;--red-glow:rgba(244,63,94,0.15);
+  --amber:#f59e0b;--r:8px;--r2:12px;
 }
-html{scroll-behavior:smooth}
-body{
-  font-family:'Syne',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh;
-  overflow-x:hidden;
-}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 
-/* ─── NOISE TEXTURE ─── */
-body::before{
-  content:'';
-  position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events:none;z-index:0;opacity:0.4;
-}
-
-/* ─── SIDEBAR ─── */
-.sidebar{
-  position:fixed;left:0;top:0;bottom:0;width:220px;
-  background:var(--bg2);
-  border-right:1px solid var(--border);
-  display:flex;flex-direction:column;
-  z-index:50;
-}
-.sidebar-logo{
-  padding:1.5rem 1.25rem 1.25rem;
-  border-bottom:1px solid var(--border);
-}
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:50}
+.sidebar-logo{padding:1.5rem 1.25rem 1.25rem;border-bottom:1px solid var(--border)}
 .logo-row{display:flex;align-items:center;gap:10px}
-.logo-icon{
-  width:34px;height:34px;
-  border-radius:9px;
-  background:linear-gradient(135deg,#3b82f6,#1d4ed8);
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-}
-.logo-icon svg{width:18px;height:18px}
-.logo-name{
-  font-family:'Syne',sans-serif;
-  font-size:16px;font-weight:700;
-  letter-spacing:-0.3px;
-  color:var(--text);
-}
-.logo-name sup{
-  font-size:9px;font-weight:600;
-  background:var(--blue);color:white;
-  padding:1px 5px;border-radius:4px;
-  vertical-align:super;margin-left:2px;
-  letter-spacing:0.5px;
-}
-
+.logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-name{font-size:16px;font-weight:700;letter-spacing:-0.3px}
+.logo-name sup{font-size:9px;font-weight:600;background:var(--blue);color:white;padding:1px 5px;border-radius:4px;vertical-align:super;margin-left:2px}
 .sidebar-nav{flex:1;padding:1rem 0.75rem;display:flex;flex-direction:column;gap:2px}
-.nav-section-label{
-  font-size:9px;font-weight:600;
-  color:var(--text3);letter-spacing:1.5px;
-  text-transform:uppercase;
-  padding:0.75rem 0.5rem 0.4rem;
-}
-.nav-item{
-  display:flex;align-items:center;gap:10px;
-  padding:0.55rem 0.75rem;
-  border-radius:var(--r);
-  cursor:pointer;
-  transition:all 0.15s;
-  font-size:13px;font-weight:500;
-  color:var(--text2);
-  border:1px solid transparent;
-}
+.nav-label{font-size:9px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;padding:0.75rem 0.5rem 0.4rem}
+.nav-item{display:flex;align-items:center;gap:10px;padding:0.55rem 0.75rem;border-radius:var(--r);cursor:pointer;transition:all 0.15s;font-size:13px;font-weight:500;color:var(--text2);border:1px solid transparent}
 .nav-item:hover{background:var(--bg3);color:var(--text)}
-.nav-item.active{
-  background:var(--blue-glow);
-  color:var(--blue);
-  border-color:rgba(59,130,246,0.2);
-}
+.nav-item.active{background:var(--blue-glow);color:var(--blue);border-color:rgba(59,130,246,0.2)}
 .nav-item svg{width:15px;height:15px;flex-shrink:0}
-.nav-badge{
-  margin-left:auto;
-  font-size:10px;font-weight:600;
-  background:var(--blue);color:white;
-  padding:1px 7px;border-radius:10px;
-}
-
-.sidebar-bottom{
-  padding:1rem 0.75rem;
-  border-top:1px solid var(--border);
-}
-.user-card{
-  display:flex;align-items:center;gap:10px;
-  padding:0.6rem 0.75rem;
-  border-radius:var(--r);
-  background:var(--bg3);
-  cursor:pointer;
-}
-.user-avatar{
-  width:30px;height:30px;border-radius:50%;
-  background:linear-gradient(135deg,#3b82f6 0%,#8b5cf6 100%);
-  display:flex;align-items:center;justify-content:center;
-  font-size:12px;font-weight:700;color:white;flex-shrink:0;
-}
+.nav-badge{margin-left:auto;font-size:10px;font-weight:600;background:var(--blue);color:white;padding:1px 7px;border-radius:10px}
+.sidebar-bottom{padding:1rem 0.75rem;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:10px;padding:0.6rem 0.75rem;border-radius:var(--r);background:var(--bg3)}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0}
 .user-info{flex:1;min-width:0}
 .user-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .user-role{font-size:10px;color:var(--text3)}
-.plan-tag{
-  font-size:9px;font-weight:600;
-  background:rgba(245,158,11,0.15);
-  color:var(--amber);
-  padding:2px 6px;border-radius:4px;
-  border:1px solid rgba(245,158,11,0.2);
-}
 
-/* ─── MAIN ─── */
-.main{
-  margin-left:220px;
-  min-height:100vh;
-  display:flex;flex-direction:column;
-}
-
-/* ─── TOPBAR ─── */
-.topbar{
-  height:56px;
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;
-  padding:0 2rem;
-  gap:1rem;
-  background:rgba(10,12,15,0.8);
-  backdrop-filter:blur(12px);
-  position:sticky;top:0;z-index:40;
-}
-.topbar-title{
-  font-family:'Instrument Serif',serif;
-  font-size:20px;
-  color:var(--text);
-  letter-spacing:-0.3px;
-}
-.topbar-date{
-  font-size:12px;color:var(--text3);
-  font-family:'JetBrains Mono',monospace;
-}
+/* ── MAIN ── */
+.main{margin-left:220px;min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 2rem;gap:1rem;background:rgba(10,12,15,0.8);backdrop-filter:blur(12px);position:sticky;top:0;z-index:40}
+.topbar-title{font-family:'Instrument Serif',serif;font-size:20px;letter-spacing:-0.3px}
+.topbar-date{font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace}
 .topbar-spacer{flex:1}
-.status-dot{
-  width:7px;height:7px;border-radius:50%;
-  background:var(--green);
-  box-shadow:0 0 8px var(--green);
-  animation:pulse-dot 2s infinite;
-}
-@keyframes pulse-dot{
-  0%,100%{opacity:1}50%{opacity:0.5}
-}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pdot 2s infinite}
+@keyframes pdot{0%,100%{opacity:1}50%{opacity:0.5}}
 .status-label{font-size:12px;color:var(--green);font-weight:500}
 
-/* ─── CONTENT ─── */
-.content{
-  flex:1;
-  display:grid;
-  grid-template-columns:1fr 480px;
-  gap:0;
-}
+/* ── PAGES ── */
+.page{display:none}
+.page.active{display:flex;flex:1}
 
-/* ─── LEFT PANEL ─── */
-.left-panel{
-  padding:1.75rem 2rem;
-  border-right:1px solid var(--border);
-  display:flex;flex-direction:column;gap:1.5rem;
-  overflow-y:auto;max-height:calc(100vh - 56px);
-}
+/* ── CONSULTATION PAGE ── */
+.consult-layout{display:grid;grid-template-columns:1fr 460px;width:100%}
+.left-panel{padding:1.75rem 2rem;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:1.25rem;overflow-y:auto;max-height:calc(100vh - 56px)}
+.left-panel::-webkit-scrollbar{width:4px}
+.left-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
 
-/* ─── PATIENT CARD ─── */
-.section-head{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:1rem;
-}
-.section-title{
-  font-size:11px;font-weight:600;
-  color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;
-}
-.section-action{
-  font-size:11px;color:var(--blue);cursor:pointer;font-weight:500;
-}
-.section-action:hover{opacity:0.8}
+/* ── STATS ── */
+.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.stat-cell{background:var(--bg3);padding:12px 14px;text-align:center}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:500;color:var(--text);margin-bottom:2px}
+.stat-lbl{font-size:10px;color:var(--text3);font-weight:500;letter-spacing:0.5px}
 
-.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* ── FORM ── */
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem}
+.section-title{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase}
+.section-action{font-size:11px;color:var(--blue);cursor:pointer;font-weight:500}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .field-grid.tri{grid-template-columns:1fr 80px 100px}
 .field{display:flex;flex-direction:column;gap:5px}
-.field label{
-  font-size:10px;font-weight:600;
-  color:var(--text3);letter-spacing:1px;text-transform:uppercase;
-}
-.field input,.field select,.field textarea{
-  background:var(--bg3);
-  border:1px solid var(--border2);
-  border-radius:var(--r);
-  padding:0 12px;
-  height:40px;
-  font-family:'Syne',sans-serif;
-  font-size:13px;
-  color:var(--text);
-  outline:none;
-  transition:border-color 0.15s,box-shadow 0.15s;
-  -webkit-appearance:none;
-}
+.field label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
+.field input,.field select,.field textarea{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:0 12px;height:40px;font-family:'Syne',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color 0.15s}
 .field select{cursor:pointer}
-.field select option{background:var(--bg3);color:var(--text)}
-.field input:focus,.field select:focus{
-  border-color:var(--blue);
-  box-shadow:0 0 0 3px var(--blue-glow);
-}
-.field textarea{
-  height:80px;padding:10px 12px;resize:none;line-height:1.5;
-}
+.field select option{background:var(--bg3)}
+.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-glow)}
+.field textarea{height:70px;padding:10px 12px;resize:none;line-height:1.5}
 
-/* ─── RECORDER ─── */
-.recorder{
-  border:1px solid var(--border2);
-  border-radius:var(--r2);
-  background:var(--bg3);
-  overflow:hidden;
-}
-.recorder-top{
-  padding:1.25rem 1.5rem;
-  display:flex;align-items:center;gap:1rem;
-}
-.rec-circle{
-  width:52px;height:52px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
-  position:relative;
-  transition:transform 0.15s;
-  flex-shrink:0;
-}
+/* ── RECORDER ── */
+.recorder{border:1px solid var(--border2);border-radius:var(--r2);background:var(--bg3);overflow:hidden}
+.recorder-top{padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem}
+.rec-circle{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:transform 0.15s;flex-shrink:0}
 .rec-circle:hover{transform:scale(1.06)}
 .rec-circle:active{transform:scale(0.95)}
-.rec-circle.idle{
-  background:var(--bg4);
-  border:2px solid var(--border2);
-}
-.rec-circle.recording{
-  background:var(--red-glow);
-  border:2px solid rgba(244,63,94,0.5);
-  animation:rec-pulse 1.4s infinite;
-}
-.rec-circle.done{
-  background:var(--green-glow);
-  border:2px solid rgba(16,185,129,0.4);
-}
-@keyframes rec-pulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(244,63,94,0.3)}
-  50%{box-shadow:0 0 0 10px rgba(244,63,94,0)}
-}
+.rec-circle.idle{background:var(--bg4);border:2px solid var(--border2)}
+.rec-circle.recording{background:var(--red-glow);border:2px solid rgba(244,63,94,0.5);animation:rpulse 1.4s infinite}
+.rec-circle.done{background:var(--green-glow);border:2px solid rgba(16,185,129,0.4)}
+@keyframes rpulse{0%,100%{box-shadow:0 0 0 0 rgba(244,63,94,0.3)}50%{box-shadow:0 0 0 10px rgba(244,63,94,0)}}
 .rec-circle svg{width:22px;height:22px}
-
 .rec-info{flex:1}
 .rec-status{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px}
 .rec-sub{font-size:12px;color:var(--text2)}
-.rec-timer{
-  font-family:'JetBrains Mono',monospace;
-  font-size:20px;font-weight:500;
-  color:var(--red);min-width:60px;text-align:right;
-}
-
-/* waveform */
-.recorder-wave{
-  height:48px;
-  padding:0 1.5rem;
-  display:flex;align-items:center;gap:3px;
-  border-top:1px solid var(--border);
-  background:var(--bg2);
-}
-.wave-bar{
-  flex:1;max-width:5px;
-  border-radius:3px;
-  background:var(--border2);
-  height:6px;
-  transition:height 0.08s ease;
-}
+.rec-timer{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:500;color:var(--red);min-width:60px;text-align:right;display:none}
+.recorder-wave{height:48px;padding:0 1.5rem;display:flex;align-items:center;gap:3px;border-top:1px solid var(--border);background:var(--bg2)}
+.wave-bar{flex:1;max-width:5px;border-radius:3px;background:var(--border2);height:6px;transition:height 0.08s ease}
 .wave-bar.active{background:var(--blue)}
-
-/* transcript */
-.transcript-wrap{
-  border-top:1px solid var(--border);
-  padding:1rem 1.5rem;
-  display:none;
-}
+.transcript-wrap{border-top:1px solid var(--border);padding:1rem 1.5rem;display:none}
 .transcript-wrap.show{display:block}
-.transcript-label{
-  font-size:9px;font-weight:600;
-  color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;
-  margin-bottom:8px;display:flex;align-items:center;gap:6px;
-}
-.transcript-label::before{
-  content:'';display:inline-block;
-  width:6px;height:6px;border-radius:50%;
-  background:var(--green);
-}
-.transcript-text{
-  font-size:13px;color:var(--text2);line-height:1.7;
-  font-style:italic;
-  font-family:'Instrument Serif',serif;
-}
+.transcript-label{font-size:9px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.transcript-label::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green)}
+.transcript-text{font-size:13px;color:var(--text2);line-height:1.7;font-style:italic;font-family:'Instrument Serif',serif}
 
-/* ─── GENERATE BTN ─── */
-.btn-generate{
-  width:100%;height:48px;
-  background:var(--blue);
-  color:white;
-  border:none;border-radius:var(--r);
-  font-family:'Syne',sans-serif;
-  font-size:14px;font-weight:600;
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:10px;
-  letter-spacing:0.3px;
-  transition:all 0.15s;
-  position:relative;overflow:hidden;
-}
-.btn-generate::before{
-  content:'';
-  position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);
-  transform:translateX(-100%);
-  transition:transform 0.6s;
-}
-.btn-generate:hover::before{transform:translateX(100%)}
+/* ── GENERATE BTN ── */
+.btn-generate{width:100%;height:48px;background:var(--blue);color:white;border:none;border-radius:var(--r);font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:0.3px;transition:all 0.15s;position:relative;overflow:hidden}
 .btn-generate:hover{background:#2563eb;box-shadow:0 4px 20px rgba(59,130,246,0.35)}
 .btn-generate:active{transform:scale(0.99)}
 .btn-generate:disabled{opacity:0.3;cursor:not-allowed}
-.btn-generate:disabled::before{display:none}
 .btn-generate.loading{background:#1d4ed8;cursor:not-allowed}
-.btn-generate.loading::before{display:none}
 
-/* ─── RIGHT PANEL ─── */
-.right-panel{
-  background:var(--bg2);
-  display:flex;flex-direction:column;
-  overflow:hidden;
-}
-
-.report-header{
-  padding:1.25rem 1.75rem;
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:12px;
-}
-.report-header-title{
-  font-size:13px;font-weight:600;
-  color:var(--text);flex:1;
-}
-.chip{
-  font-size:10px;font-weight:600;
-  padding:3px 10px;border-radius:20px;
-  letter-spacing:0.5px;text-transform:uppercase;
-}
+/* ── RIGHT PANEL ── */
+.right-panel{background:var(--bg2);display:flex;flex-direction:column}
+.report-header{padding:1.25rem 1.75rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.report-header-title{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.chip{font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:0.5px;text-transform:uppercase}
 .chip-green{background:var(--green-glow);color:var(--green);border:1px solid rgba(16,185,129,0.2)}
 .chip-amber{background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.2)}
-
-.report-scroll{
-  flex:1;overflow-y:auto;padding:1.5rem 1.75rem;
-}
+.report-scroll{flex:1;overflow-y:auto;padding:1.5rem 1.75rem}
 .report-scroll::-webkit-scrollbar{width:4px}
-.report-scroll::-webkit-scrollbar-track{background:transparent}
 .report-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
-
-/* empty state */
-.report-empty{
-  height:100%;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  gap:1rem;padding:2rem;text-align:center;
-}
-.empty-icon{
-  width:64px;height:64px;border-radius:50%;
-  background:var(--bg3);
-  border:1px solid var(--border2);
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:0.5rem;
-}
+.report-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem;text-align:center}
+.empty-icon{width:64px;height:64px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center}
 .empty-title{font-size:15px;font-weight:600;color:var(--text2)}
 .empty-sub{font-size:13px;color:var(--text3);line-height:1.6;max-width:260px}
-
-/* report sections */
-.report-meta-row{
-  display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem;
-}
-.meta-pill{
-  font-size:11px;font-weight:500;
-  padding:4px 12px;border-radius:20px;
-  border:1px solid var(--border2);
-  color:var(--text2);background:var(--bg3);
-}
-.meta-pill.highlight{
-  background:var(--blue-glow);
-  color:var(--blue);
-  border-color:rgba(59,130,246,0.25);
-}
-
-.rsection{
-  margin-bottom:1.25rem;
-  opacity:0;
-  transform:translateY(8px);
-  transition:opacity 0.3s ease, transform 0.3s ease;
-}
+.report-meta-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.meta-pill{font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;border:1px solid var(--border2);color:var(--text2);background:var(--bg3)}
+.meta-pill.highlight{background:var(--blue-glow);color:var(--blue);border-color:rgba(59,130,246,0.25)}
+.edit-hint{font-size:11px;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.rsection{margin-bottom:1.25rem;opacity:0;transform:translateY(8px);transition:opacity 0.3s,transform 0.3s}
 .rsection.visible{opacity:1;transform:translateY(0)}
-.rsection-label{
-  font-size:9px;font-weight:700;
-  color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;
-  margin-bottom:6px;
-  display:flex;align-items:center;gap:8px;
-}
-.rsection-label::after{
-  content:'';flex:1;height:1px;background:var(--border);
-}
-.rsection-body{
-  background:var(--bg3);
-  border:1px solid var(--border2);
-  border-radius:var(--r);
-  padding:12px 14px;
-  font-size:13px;line-height:1.75;
-  color:var(--text);
-  position:relative;
-}
-.rsection-body.accent-blue{
-  border-left:3px solid var(--blue);
-  background:var(--blue-glow);
-}
-.rsection-body.accent-green{
-  border-left:3px solid var(--green);
-  background:var(--green-glow);
-}
-.rsection-body.accent-red{
-  border-left:3px solid var(--red);
-  background:var(--red-glow);
-}
-.rsection-body ul{padding-left:16px}
-.rsection-body li{margin-bottom:4px}
-
-/* streaming cursor */
-.cursor{
-  display:inline-block;width:2px;height:13px;
-  background:var(--blue);vertical-align:middle;margin-left:1px;
-  animation:blink 0.7s step-end infinite;
-}
+.rsection-label{font-size:9px;font-weight:700;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.rsection-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.rsection-body{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:12px 14px;font-size:13px;line-height:1.75;color:var(--text);outline:none;cursor:text;transition:border-color 0.15s}
+.rsection-body:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-glow)}
+.rsection-body.accent-blue{border-left:3px solid var(--blue);background:var(--blue-glow)}
+.rsection-body.accent-green{border-left:3px solid var(--green);background:var(--green-glow)}
+.rsection-body.accent-red{border-left:3px solid var(--red);background:var(--red-glow)}
+.cursor{display:inline-block;width:2px;height:13px;background:var(--blue);vertical-align:middle;margin-left:1px;animation:blink 0.7s step-end infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-
-/* ─── REPORT FOOTER ─── */
-.report-footer{
-  padding:1rem 1.75rem;
-  border-top:1px solid var(--border);
-  display:flex;gap:8px;
-  display:none;
-}
+.report-footer{padding:1rem 1.75rem;border-top:1px solid var(--border);display:none;gap:8px;flex-wrap:wrap}
 .report-footer.show{display:flex}
-.btn-sm{
-  flex:1;height:36px;
-  border-radius:var(--r);
-  border:1px solid var(--border2);
-  background:transparent;
-  font-family:'Syne',sans-serif;
-  font-size:12px;font-weight:600;
-  color:var(--text2);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-  transition:all 0.15s;letter-spacing:0.3px;
-}
+.btn-sm{flex:1;min-width:80px;height:36px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s}
 .btn-sm:hover{background:var(--bg3);border-color:var(--text3);color:var(--text)}
+.btn-sm.green{background:rgba(16,185,129,0.15);color:var(--green);border-color:rgba(16,185,129,0.3)}
 .btn-sm.primary{background:var(--blue);color:white;border-color:var(--blue)}
 .btn-sm.primary:hover{background:#2563eb}
 
-/* ─── HISTORY ─── */
-.history-items{display:flex;flex-direction:column;gap:6px}
-.history-row{
-  display:flex;align-items:center;
-  padding:10px 12px;
-  border-radius:var(--r);
-  background:var(--bg3);
-  border:1px solid var(--border);
-  cursor:pointer;
-  transition:all 0.15s;
-  gap:10px;
-}
-.history-row:hover{border-color:var(--blue);background:var(--blue-glow)}
-.hist-dot{
-  width:8px;height:8px;border-radius:50%;
-  background:var(--green);flex-shrink:0;
-}
-.hist-name{font-size:13px;font-weight:600;color:var(--text);flex:1}
-.hist-type{font-size:11px;color:var(--text3)}
-.hist-time{
-  font-family:'JetBrains Mono',monospace;
-  font-size:11px;color:var(--text3);
-}
+/* ── HISTORY PAGE ── */
+.history-page{flex:1;padding:2rem;overflow-y:auto}
+.history-empty{text-align:center;padding:4rem 2rem;color:var(--text3);font-size:14px}
+.history-table{width:100%;border-collapse:collapse}
+.history-table th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left}
+.history-table td{padding:12px 12px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
+.history-table tr:hover td{background:var(--bg3);cursor:pointer}
+.hist-name{font-weight:600;color:var(--text)}
+.hist-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:8px}
 
-/* spinner */
-.spin{
-  width:16px;height:16px;
-  border:2px solid rgba(255,255,255,0.2);
-  border-top-color:white;border-radius:50%;
-  animation:rotate 0.6s linear infinite;
-}
+/* ── SETTINGS PAGE ── */
+.settings-page{flex:1;padding:2rem;overflow-y:auto;max-width:700px}
+.settings-section{margin-bottom:2rem}
+.settings-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border)}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.btn-save{height:42px;padding:0 24px;background:var(--blue);color:white;border:none;border-radius:var(--r);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s}
+.btn-save:hover{background:#2563eb}
+
+/* ── UTILS ── */
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;animation:rotate 0.6s linear infinite}
 @keyframes rotate{to{transform:rotate(360deg)}}
-
-/* toast */
-.toast{
-  position:fixed;bottom:1.5rem;left:50%;
-  transform:translateX(-50%) translateY(10px);
-  background:var(--bg4);border:1px solid var(--border2);
-  color:var(--text);
-  padding:10px 20px;border-radius:30px;
-  font-size:13px;font-weight:500;
-  opacity:0;transition:all 0.2s;
-  pointer-events:none;z-index:999;
-  box-shadow:0 8px 32px rgba(0,0,0,0.4);
-}
+.history-rows{display:flex;flex-direction:column;gap:8px}
+.history-row{display:flex;align-items:center;padding:12px 14px;border-radius:var(--r);background:var(--bg3);border:1px solid var(--border);gap:10px;cursor:pointer;transition:all 0.15s}
+.history-row:hover{border-color:var(--blue);background:var(--blue-glow)}
+.hist-name-col{flex:1;font-size:13px;font-weight:600;color:var(--text)}
+.hist-type-col{font-size:11px;color:var(--text3)}
+.hist-time-col{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(10px);background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:10px 20px;border-radius:30px;font-size:13px;font-weight:500;opacity:0;transition:all 0.2s;pointer-events:none;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* ─── STATS BAR ─── */
-.stats-bar{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:1px;background:var(--border);
-  border:1px solid var(--border);
-  border-radius:var(--r2);overflow:hidden;
-}
-.stat-cell{
-  background:var(--bg3);
-  padding:12px 14px;
-  text-align:center;
-}
-.stat-val{
-  font-family:'JetBrains Mono',monospace;
-  font-size:20px;font-weight:500;
-  color:var(--text);margin-bottom:2px;
-}
-.stat-lbl{font-size:10px;color:var(--text3);font-weight:500;letter-spacing:0.5px}
-
-/* page load animation */
-.main{animation:fadeIn 0.4s ease}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-
-/* scrollbar */
-.left-panel::-webkit-scrollbar{width:4px}
-.left-panel::-webkit-scrollbar-track{background:transparent}
-.left-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
 </style>
 </head>
 <body>
@@ -576,7 +185,7 @@ body::before{
   <div class="sidebar-logo">
     <div class="logo-row">
       <div class="logo-icon">
-        <svg viewBox="0 0 18 18" fill="none">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <path d="M2 4h14M2 8h9M2 12h11" stroke="white" stroke-width="1.7" stroke-linecap="round"/>
           <circle cx="14.5" cy="12" r="3" stroke="white" stroke-width="1.3"/>
           <path d="M14.5 10.5v3M13 12h3" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
@@ -587,43 +196,30 @@ body::before{
   </div>
 
   <nav class="sidebar-nav">
-    <div class="nav-section-label">Principal</div>
-    <div class="nav-item active">
-      <svg viewBox="0 0 15 15" fill="none"><path d="M2 2h11v11H2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M5 7h5M5 9.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    <div class="nav-label">Principal</div>
+    <div class="nav-item active" onclick="showPage('consult')" id="nav-consult">
+      <svg viewBox="0 0 15 15" fill="none"><rect x="2" y="2" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h5M5 9.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
       Nouvelle consultation
     </div>
-    <div class="nav-item">
+    <div class="nav-item" onclick="showPage('history')" id="nav-history">
       <svg viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7.5 4.5v3l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
       Historique
       <span class="nav-badge" id="nav-count">0</span>
     </div>
-    <div class="nav-item">
-      <svg viewBox="0 0 15 15" fill="none"><path d="M2 2h11v11H2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M5 4.5h5M5 7h5M5 9.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Modèles
-    </div>
-    <div class="nav-section-label" style="margin-top:0.5rem">Outils</div>
-    <div class="nav-item">
-      <svg viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M2 13c0-2.5 2.5-4 5.5-4s5.5 1.5 5.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Patients
-    </div>
-    <div class="nav-item">
-      <svg viewBox="0 0 15 15" fill="none"><rect x="2" y="2" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 7.5l2 2 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Statistiques
-    </div>
-    <div class="nav-item">
-      <svg viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7.5 5v2.5l1.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    <div class="nav-label" style="margin-top:0.5rem">Compte</div>
+    <div class="nav-item" onclick="showPage('settings')" id="nav-settings">
+      <svg viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M7.5 1v1.5M7.5 12.5V14M1 7.5h1.5M12.5 7.5H14M2.9 2.9l1.1 1.1M11 11l1.1 1.1M2.9 12.1l1.1-1.1M11 4l1.1-1.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
       Paramètres
     </div>
   </nav>
 
   <div class="sidebar-bottom">
     <div class="user-card">
-      <div class="user-avatar">DR</div>
+      <div class="user-avatar" id="avatar-initials">DR</div>
       <div class="user-info">
-        <div class="user-name">Dr. Résidence</div>
-        <div class="user-role">Médecin généraliste</div>
+        <div class="user-name" id="sidebar-doc-name">Dr. Médecin</div>
+        <div class="user-role" id="sidebar-doc-spec">Médecine générale</div>
       </div>
-      <span class="plan-tag">PRO</span>
     </div>
   </div>
 </aside>
@@ -633,118 +229,167 @@ body::before{
 
   <!-- TOPBAR -->
   <div class="topbar">
-    <span class="topbar-title">Consultation</span>
+    <span class="topbar-title" id="page-title">Consultation</span>
     <span class="topbar-date" id="topbar-date"></span>
     <div class="topbar-spacer"></div>
     <div class="status-dot"></div>
     <span class="status-label">IA connectée</span>
   </div>
 
-  <!-- CONTENT -->
-  <div class="content">
+  <!-- ══ PAGE : CONSULTATION ══ -->
+  <div class="page active" id="page-consult">
+    <div class="consult-layout">
 
-    <!-- LEFT -->
-    <div class="left-panel">
+      <!-- LEFT -->
+      <div class="left-panel">
 
-      <!-- Stats -->
-      <div class="stats-bar">
-        <div class="stat-cell">
-          <div class="stat-val" id="s-today">0</div>
-          <div class="stat-lbl">Aujourd'hui</div>
+        <!-- Stats -->
+        <div class="stats-bar">
+          <div class="stat-cell"><div class="stat-val" id="s-today">0</div><div class="stat-lbl">Aujourd'hui</div></div>
+          <div class="stat-cell"><div class="stat-val">~3 min</div><div class="stat-lbl">Temps moyen</div></div>
+          <div class="stat-cell"><div class="stat-val" id="s-saved">0 min</div><div class="stat-lbl">Économisé</div></div>
         </div>
-        <div class="stat-cell">
-          <div class="stat-val">~3 min</div>
-          <div class="stat-lbl">Temps moyen</div>
-        </div>
-        <div class="stat-cell">
-          <div class="stat-val" id="s-saved">0 min</div>
-          <div class="stat-lbl">Temps économisé</div>
-        </div>
-      </div>
 
-      <!-- Doctor Profile - collapsible -->
-      <div id="doctor-profile-section">
-        <div class="section-head" onclick="toggleProfile()" style="cursor:pointer">
-          <span class="section-title">Profil médecin</span>
-          <span class="section-action" id="profile-toggle">▼ Modifier</span>
-        </div>
-        <div id="profile-fields" style="display:none">
-          <div class="field-grid" style="margin-bottom:10px">
-            <div class="field">
-              <label>Nom du médecin</label>
-              <input type="text" id="doc-name" placeholder="Dr. Mohamed Zaanoun">
-            </div>
+        <!-- Patient -->
+        <div>
+          <div class="section-head">
+            <span class="section-title">Patient</span>
+            <span class="section-action" onclick="clearForm()">Effacer</span>
+          </div>
+          <div class="field-grid">
+            <div class="field"><label>Nom complet</label><input type="text" id="f-name" placeholder="Dupont Jean"></div>
+            <div class="field"><label>Date de naissance</label><input type="text" id="f-dob" placeholder="12/04/1972"></div>
+          </div>
+          <div class="field-grid tri">
             <div class="field">
               <label>Spécialité</label>
-              <input type="text" id="doc-spec" placeholder="Médecine générale">
+              <select id="f-type">
+                <option>Médecine générale</option>
+                <option>Cardiologie</option>
+                <option>Pneumologie</option>
+                <option>Dermatologie</option>
+                <option>Neurologie</option>
+                <option>Pédiatrie</option>
+                <option>Gynécologie</option>
+                <option>Urgences</option>
+                <option>Psychiatrie</option>
+              </select>
             </div>
-          </div>
-          <div class="field-grid" style="margin-bottom:10px">
+            <div class="field"><label>Âge</label><input type="number" id="f-age" placeholder="52" min="0" max="120"></div>
             <div class="field">
-              <label>Téléphone</label>
-              <input type="text" id="doc-tel" placeholder="+216 XX XXX XXX">
-            </div>
-            <div class="field">
-              <label>N° RPPS / INPE</label>
-              <input type="text" id="doc-rpps" placeholder="XXXXXXXXXX">
+              <label>Sexe</label>
+              <select id="f-sex"><option value="">—</option><option>Masculin</option><option>Féminin</option></select>
             </div>
           </div>
-          <div class="field" style="margin-bottom:10px">
-            <label>Adresse cabinet</label>
-            <input type="text" id="doc-address" placeholder="123 rue de la Santé, Tunis">
+          <div class="field"><label>Antécédents (optionnel)</label><textarea id="f-history" placeholder="HTA, diabète T2, allergie pénicilline…"></textarea></div>
+        </div>
+
+        <!-- Recorder -->
+        <div>
+          <div class="section-head">
+            <span class="section-title">Dictée vocale</span>
+            <span class="section-action" id="mode-label">Prêt</span>
           </div>
-          <button class="btn-generate" style="height:36px;font-size:12px;margin-bottom:0" onclick="saveDoctorProfile()">
-            Sauvegarder le profil
+          <div class="recorder">
+            <div class="recorder-top">
+              <div class="rec-circle idle" id="rec-btn" onclick="toggleRec()">
+                <svg viewBox="0 0 22 22" fill="none"><rect x="7.5" y="2" width="7" height="12" rx="3.5" stroke="currentColor" stroke-width="1.5" fill="rgba(255,255,255,0.08)"/><path d="M3.5 11c0 4.1 3.3 7.5 7.5 7.5s7.5-3.4 7.5-7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="11" y1="18.5" x2="11" y2="21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <div class="rec-info">
+                <div class="rec-status" id="rec-status">Prêt à enregistrer</div>
+                <div class="rec-sub" id="rec-sub">Cliquez sur le micro pour commencer</div>
+              </div>
+              <div class="rec-timer" id="rec-timer">00:00</div>
+            </div>
+            <div class="recorder-wave" id="wave-container"></div>
+            <div class="transcript-wrap" id="transcript-wrap">
+              <div class="transcript-label">Transcription en direct</div>
+              <div class="transcript-text" id="transcript-text"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generate -->
+        <button class="btn-generate" id="gen-btn" disabled onclick="generateReport()">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8h14M10 3l5 5-5 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Générer le compte-rendu IA
+        </button>
+
+        <!-- History today -->
+        <div id="history-today" style="display:none">
+          <div class="section-head"><span class="section-title">Consultations du jour</span></div>
+          <div class="history-rows" id="history-today-list"></div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT -->
+      <div class="right-panel">
+        <div class="report-header">
+          <span class="report-header-title">Compte-rendu médical</span>
+          <span class="chip chip-amber" id="r-chip">En attente</span>
+        </div>
+        <div class="report-scroll">
+          <div class="report-empty" id="report-empty">
+            <div class="empty-icon">
+              <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M7 3h12l5 5v15a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2z" stroke="#3a4458" stroke-width="1.5"/><path d="M17 3v7h7M8 13h10M8 17h7M8 9h4" stroke="#3a4458" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div class="empty-title">Aucun compte-rendu</div>
+            <div class="empty-sub">Renseignez le patient, dictez la consultation, puis générez.</div>
+          </div>
+          <div id="report-body" style="display:none"></div>
+        </div>
+        <div class="report-footer" id="report-footer">
+          <button class="btn-sm" onclick="copyReport()">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 9V2.5A1.5 1.5 0 013.5 1H9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Copier
           </button>
+          <button class="btn-sm" onclick="exportPDF()">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2h7l3 3v6.5A1.5 1.5 0 0110.5 13h-8A1.5 1.5 0 011 11.5v-8A1.5 1.5 0 012 2z" stroke="currentColor" stroke-width="1.2"/><path d="M8 2v4h4M4.5 8h4M4.5 10h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Compte-rendu PDF
+          </button>
+          <button class="btn-sm green" onclick="exportOrdonnance()">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2h7l3 3v6.5A1.5 1.5 0 0110.5 13h-8A1.5 1.5 0 011 11.5v-8A1.5 1.5 0 012 2z" stroke="currentColor" stroke-width="1.2"/><path d="M4 6h5M4 8.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Ordonnance
+          </button>
+          <button class="btn-sm primary" onclick="newConsult()">Nouveau</button>
         </div>
       </div>
 
-      <!-- Patient -->
-      <div>
-        <div class="section-head">
-          <span class="section-title">Informations patient</span>
-          <span class="section-action" onclick="clearForm()">Effacer</span>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : HISTORIQUE ══ -->
+  <div class="page" id="page-history">
+    <div class="history-page">
+      <div class="section-head" style="margin-bottom:1.5rem">
+        <span class="section-title">Toutes les consultations</span>
+      </div>
+      <div id="history-full-list">
+        <div class="history-empty">Aucune consultation enregistrée pour le moment.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : PARAMÈTRES ══ -->
+  <div class="page" id="page-settings">
+    <div class="settings-page">
+
+      <div class="settings-section">
+        <div class="settings-title">Profil du médecin</div>
+        <div class="settings-grid">
+          <div class="field"><label>Nom complet</label><input type="text" id="doc-name" placeholder="Dr. Mohamed Zaanoun"></div>
+          <div class="field"><label>Spécialité</label><input type="text" id="doc-spec" placeholder="Médecine générale"></div>
+          <div class="field"><label>Téléphone</label><input type="text" id="doc-tel" placeholder="+216 XX XXX XXX"></div>
+          <div class="field"><label>N° RPPS / INPE</label><input type="text" id="doc-rpps" placeholder="XXXXXXXXXX"></div>
         </div>
-        <div class="field-grid" style="margin-bottom:10px">
-          <div class="field">
-            <label>Nom complet</label>
-            <input type="text" id="f-name" placeholder="Dupont Jean">
-          </div>
-          <div class="field">
-            <label>Date de naissance</label>
-            <input type="text" id="f-dob" placeholder="12/04/1972">
-          </div>
-        </div>
-        <div class="field-grid tri" style="margin-bottom:10px">
-          <div class="field">
-            <label>Spécialité</label>
-            <select id="f-type">
-              <option>Médecine générale</option>
-              <option>Cardiologie</option>
-              <option>Pneumologie</option>
-              <option>Dermatologie</option>
-              <option>Neurologie</option>
-              <option>Pédiatrie</option>
-              <option>Gynécologie</option>
-              <option>Urgences</option>
-              <option>Suivi chronique</option>
-              <option>Psychiatrie</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Âge</label>
-            <input type="number" id="f-age" placeholder="52" min="0" max="120">
-          </div>
-          <div class="field">
-            <label>Sexe</label>
-            <select id="f-sex">
-              <option value="">—</option>
-              <option>Masculin</option>
-              <option>Féminin</option>
-            </select>
-          </div>
-        </div>
-        <div class="field-grid" style="margin-bottom:10px">
+        <div class="field" style="margin-bottom:16px"><label>Adresse du cabinet</label><input type="text" id="doc-address" placeholder="123 rue de la Santé, Tunis"></div>
+        <button class="btn-save" onclick="saveDoctorProfile()">Sauvegarder le profil</button>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Préférences</div>
+        <div class="settings-grid">
           <div class="field">
             <label>Langue du compte-rendu</label>
             <select id="f-lang">
@@ -754,7 +399,7 @@ body::before{
             </select>
           </div>
           <div class="field">
-            <label>Modèle</label>
+            <label>Modèle par défaut</label>
             <select id="f-template">
               <option value="standard">Standard</option>
               <option value="cardio">Cardiologie</option>
@@ -764,234 +409,104 @@ body::before{
             </select>
           </div>
         </div>
-        <div class="field">
-          <label>Antécédents notables (optionnel)</label>
-          <textarea id="f-history" placeholder="HTA, diabète T2, allergie pénicilline…"></textarea>
-        </div>
-      </div>
-
-      <!-- Recorder -->
-      <div>
-        <div class="section-head">
-          <span class="section-title">Dictée vocale</span>
-          <span class="section-action" id="mode-label">Mode démo actif</span>
-        </div>
-        <div class="field" style="margin-bottom:10px">
-          <label>Transcription <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">— Web Speech API (Chrome natif, gratuit)</span></label>
-          <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);font-size:12px;color:var(--text2)">
-            <div class="status-dot" style="flex-shrink:0"></div>
-            Reconnaissance vocale intégrée au navigateur — aucune clé requise
-          </div>
-        </div>
-        <div class="recorder" id="recorder">
-          <div class="recorder-top">
-            <div class="rec-circle idle" id="rec-btn" onclick="toggleRec()">
-              <svg viewBox="0 0 22 22" fill="none">
-                <rect x="7.5" y="2" width="7" height="12" rx="3.5" stroke="currentColor" stroke-width="1.5" fill="rgba(255,255,255,0.08)"/>
-                <path d="M3.5 11c0 4.1 3.3 7.5 7.5 7.5s7.5-3.4 7.5-7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                <line x1="11" y1="18.5" x2="11" y2="21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
-            </div>
-            <div class="rec-info">
-              <div class="rec-status" id="rec-status">Prêt à enregistrer</div>
-              <div class="rec-sub" id="rec-sub">Cliquez sur le micro pour commencer la dictée</div>
-            </div>
-            <div class="rec-timer" id="rec-timer" style="display:none">00:00</div>
-          </div>
-          <div class="recorder-wave" id="wave-container">
-            <!-- bars injected by JS -->
-          </div>
-          <div class="transcript-wrap" id="transcript-wrap">
-            <div class="transcript-label">Transcription automatique</div>
-            <div class="transcript-text" id="transcript-text"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Generate -->
-      <button class="btn-generate" id="gen-btn" disabled onclick="generateReport()">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M1 8h14M10 3l5 5-5 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Générer le compte-rendu IA
-      </button>
-
-      <!-- History -->
-      <div id="history-section" style="display:none">
-        <div class="section-head">
-          <span class="section-title">Consultations du jour</span>
-        </div>
-        <div class="history-items" id="history-list"></div>
+        <button class="btn-save" onclick="savePreferences()">Sauvegarder les préférences</button>
       </div>
 
     </div>
-
-    <!-- RIGHT -->
-    <div class="right-panel">
-      <div class="report-header">
-        <span class="report-header-title">Compte-rendu médical</span>
-        <span class="chip chip-amber" id="r-chip">En attente</span>
-      </div>
-
-      <div class="report-scroll" id="report-scroll">
-        <div class="report-empty" id="report-empty">
-          <div class="empty-icon">
-            <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-              <path d="M7 3h12l5 5v15a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2z" stroke="#3a4458" stroke-width="1.5"/>
-              <path d="M17 3v7h7M8 13h10M8 17h7M8 9h4" stroke="#3a4458" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div class="empty-title">Aucun compte-rendu</div>
-          <div class="empty-sub">Renseignez les informations patient, dictez la consultation puis cliquez sur Générer.</div>
-        </div>
-        <div id="report-body" style="display:none"></div>
-      </div>
-
-      <div class="report-footer" id="report-footer">
-        <button class="btn-sm" onclick="copyReport()">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 9V2.5A1.5 1.5 0 013.5 1H9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-          Copier
-        </button>
-        <button class="btn-sm" onclick="exportPDF()">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2h7l3 3v6.5A1.5 1.5 0 0110.5 13h-8A1.5 1.5 0 011 11.5v-8A1.5 1.5 0 012 2z" stroke="currentColor" stroke-width="1.2"/><path d="M8 2v4h4M4.5 8h4M4.5 10h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-          Compte-rendu PDF
-        </button>
-        <button class="btn-sm" style="background:rgba(16,185,129,0.15);color:#10b981;border-color:rgba(16,185,129,0.3)" onclick="exportOrdonnance()">
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2h7l3 3v6.5A1.5 1.5 0 0110.5 13h-8A1.5 1.5 0 011 11.5v-8A1.5 1.5 0 012 2z" stroke="currentColor" stroke-width="1.2"/><path d="M4 6h5M4 8.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-          Ordonnance
-        </button>
-        <button class="btn-sm primary" onclick="newConsult()">
-          Nouveau
-        </button>
-      </div>
-    </div>
-
   </div>
+
 </main>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── INIT ──
-const BARS = 40;
-const wave = document.getElementById('wave-container');
-for(let i=0;i<BARS;i++){
-  const b=document.createElement('div');
-  b.className='wave-bar';b.id='wb'+i;
-  wave.appendChild(b);
+// ── NAVIGATION ──
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  const titles={consult:'Consultation',history:'Historique',settings:'Paramètres'};
+  document.getElementById('page-title').textContent=titles[name]||name;
 }
 
-// Date
-const now = new Date();
-document.getElementById('topbar-date').textContent =
-  now.toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+// ── INIT ──
+const BARS=40;
+const waveEl=document.getElementById('wave-container');
+for(let i=0;i<BARS;i++){const b=document.createElement('div');b.className='wave-bar';b.id='wb'+i;waveEl.appendChild(b);}
 
-// Load saved doctor profile
+document.getElementById('topbar-date').textContent=
+  new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+
 loadDoctorProfile();
+loadPreferences();
 
 // ── STATE ──
-let isRec=false, recog=null, timerInt=null, waveInt=null;
-let seconds=0, transcript='', reportCount=0, history=[];
-let savedMinutes=0, interimText='';
+let isRec=false,recog=null,timerInt=null,waveInt=null;
+let seconds=0,transcript='',reportCount=0,historyList=[];
+let savedMinutes=0,interimText='';
 
-// ── SPEECH RECOGNITION SETUP ──
+// ── SPEECH RECOGNITION ──
 function buildRecognition(){
-  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SpeechRecognition) return null;
-  const r=new SpeechRecognition();
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR) return null;
+  const r=new SR();
   const langMap={'fr':'fr-FR','ar':'ar-TN','en':'en-US'};
-  const selectedLang=document.getElementById('f-lang')?.value||'fr';
-  r.lang=langMap[selectedLang]||'fr-FR';
-  r.continuous=true;
-  r.interimResults=true;
-  r.maxAlternatives=1;
+  r.lang=langMap[document.getElementById('f-lang')?.value||'fr']||'fr-FR';
+  r.continuous=true;r.interimResults=true;r.maxAlternatives=1;
   r.onresult=e=>{
-    let interim='', final='';
+    let final='',interim='';
     for(let i=e.resultIndex;i<e.results.length;i++){
       const t=e.results[i][0].transcript;
-      if(e.results[i].isFinal) final+=t+' ';
-      else interim+=t;
+      if(e.results[i].isFinal) final+=t+' '; else interim+=t;
     }
     if(final) transcript+=final;
-    // Show live in transcript box
-    const txt=document.getElementById('transcript-text');
-    const wrap=document.getElementById('transcript-wrap');
-    wrap.classList.add('show');
-    txt.textContent=(transcript+interim).trim();
+    document.getElementById('transcript-wrap').classList.add('show');
+    document.getElementById('transcript-text').textContent=(transcript+interim).trim();
   };
   r.onerror=err=>{
-    if(err.error==='not-allowed'){
-      toast('Microphone refusé — autorisez l\'accès dans votre navigateur');
-    } else if(err.error!=='no-speech'){
-      toast('Erreur micro : '+err.error);
-    }
+    if(err.error==='not-allowed') toast('Microphone refusé — autorisez dans Chrome');
+    else if(err.error!=='no-speech') toast('Erreur : '+err.error);
   };
-  r.onend=()=>{
-    if(isRec){ try{r.start()}catch{} } // auto-restart while recording
-  };
+  r.onend=()=>{if(isRec) try{r.start()}catch{}};
   return r;
 }
 
-// ── RECORDING ──
-async function toggleRec(){
-  if(!isRec) startRec(); else stopRec();
-}
+function toggleRec(){if(!isRec) startRec(); else stopRec();}
 
 function startRec(){
-  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SpeechRecognition){
-    toast('Utilisez Chrome ou Edge sur ordinateur');
-    return;
-  }
-  transcript=''; interimText='';
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Utilisez Chrome ou Edge');return;}
+  transcript='';
   document.getElementById('transcript-text').textContent='';
   document.getElementById('transcript-wrap').classList.remove('show');
   document.getElementById('gen-btn').disabled=true;
-  document.getElementById('mode-label').textContent='Micro actif ✓';
-
   recog=buildRecognition();
-  if(!recog){ toast('Erreur initialisation micro'); return; }
-
+  if(!recog) return;
   recog.start();
-  isRec=true; seconds=0;
+  isRec=true;seconds=0;
   setRecState('recording');
   document.getElementById('rec-timer').style.display='block';
+  document.getElementById('mode-label').textContent='Micro actif ✓';
   timerInt=setInterval(()=>{
     seconds++;
-    const m=String(Math.floor(seconds/60)).padStart(2,'0');
-    const s=String(seconds%60).padStart(2,'0');
-    document.getElementById('rec-timer').textContent=`${m}:${s}`;
+    document.getElementById('rec-timer').textContent=
+      String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
   },1000);
   waveInt=setInterval(animWave,90);
 }
 
 function stopRec(){
   isRec=false;
-  if(recog){ try{recog.stop()}catch{} }
-  clearInterval(timerInt); clearInterval(waveInt);
-  resetWave();
+  if(recog) try{recog.stop()}catch{}
+  clearInterval(timerInt);clearInterval(waveInt);resetWave();
   document.getElementById('rec-timer').style.display='none';
-
-  // Read from DOM as safety net — speech recognition may not have finalized
-  const domText=document.getElementById('transcript-text').textContent.trim();
-  const final=(transcript||domText).trim();
-
-  if(!final){
-    toast('Aucune parole détectée — réessayez');
-    setRecState('idle');
-    document.getElementById('mode-label').textContent='Prêt';
-    return;
-  }
+  const final=(transcript||document.getElementById('transcript-text').textContent).trim();
+  if(!final){toast('Aucune parole détectée');setRecState('idle');document.getElementById('mode-label').textContent='Prêt';return;}
   transcript=final;
-  document.getElementById('transcript-text').textContent=final;
-  document.getElementById('transcript-wrap').classList.add('show');
   setRecState('done');
   document.getElementById('mode-label').textContent='Transcription ✓';
-  // Force enable button
-  const btn=document.getElementById('gen-btn');
-  btn.disabled=false;
-  btn.style.opacity='1';
-  btn.style.cursor='pointer';
+  document.getElementById('gen-btn').disabled=false;
 }
 
 function setRecState(s){
@@ -1003,71 +518,50 @@ function setRecState(s){
     recording:`<svg viewBox="0 0 22 22" fill="none"><rect x="6" y="6" width="10" height="10" rx="2" fill="#f43f5e"/></svg>`,
     done:`<svg viewBox="0 0 22 22" fill="none"><path d="M5 11l4 4 8-8" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
   };
-  btn.className='rec-circle '+(s==='transcribing'?'idle':s);
+  btn.className='rec-circle '+s;
   btn.innerHTML=icons[s]||icons.idle;
-  if(s==='recording'){status.textContent='Enregistrement en cours…';sub.textContent='Cliquez pour arrêter — la transcription s\'affiche en temps réel'}
-  else if(s==='done'){status.textContent='Dictée terminée';sub.textContent='Transcription complète — prêt à générer'}
-  else{status.textContent='Prêt à enregistrer';sub.textContent='Cliquez sur le micro pour commencer la dictée'}
+  if(s==='recording'){status.textContent='Enregistrement…';sub.textContent='Cliquez pour arrêter';}
+  else if(s==='done'){status.textContent='Dictée terminée';sub.textContent='Transcription complète — prêt à générer';}
+  else{status.textContent='Prêt à enregistrer';sub.textContent='Cliquez sur le micro pour commencer';}
 }
 
 function animWave(){
   for(let i=0;i<BARS;i++){
     const b=document.getElementById('wb'+i);
-    if(!b) continue;
-    const h=Math.random()*26+4;
-    b.style.height=h+'px';
-    b.classList.add('active');
+    if(b){b.style.height=(Math.random()*26+4)+'px';b.classList.add('active');}
   }
 }
 function resetWave(){
   for(let i=0;i<BARS;i++){
     const b=document.getElementById('wb'+i);
-    if(b){b.style.height='6px';b.classList.remove('active')}
+    if(b){b.style.height='6px';b.classList.remove('active');}
   }
 }
 
 // ── GENERATE ──
 async function generateReport(){
-  // Read transcript from variable AND from DOM as safety net
-  const liveTranscript = transcript.trim() || document.getElementById('transcript-text').textContent.trim();
-
-  if(!liveTranscript){
-    toast('⚠️ Aucune dictée détectée — parlez d\'abord dans le micro');
-    return;
-  }
-
+  const liveTranscript=(transcript||document.getElementById('transcript-text').textContent).trim();
+  if(!liveTranscript){toast('⚠️ Dictée manquante');return;}
   const name=document.getElementById('f-name').value||'Patient';
   const age=document.getElementById('f-age').value||'—';
   const sex=document.getElementById('f-sex').value||'—';
   const type=document.getElementById('f-type').value;
-  const dob=document.getElementById('f-dob').value||'—';
-  const histo=document.getElementById('f-history').value||'Aucun antécédent renseigné';
-
   const lang=document.getElementById('f-lang')?.value||'fr';
   const template=document.getElementById('f-template')?.value||'standard';
 
   const btn=document.getElementById('gen-btn');
-  btn.classList.add('loading');
-  btn.innerHTML='<div class="spin"></div> Analyse en cours…';
-
+  btn.classList.add('loading');btn.innerHTML='<div class="spin"></div> Génération…';
   document.getElementById('report-empty').style.display='none';
-  const body=document.getElementById('report-body');
-  body.style.display='block';
+  const body=document.getElementById('report-body');body.style.display='block';
 
   const today=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
   body.innerHTML=`
     <div class="report-meta-row">
       <span class="meta-pill highlight">👤 ${name}${age!=='—'?', '+age+' ans':''}</span>
-      <span class="meta-pill">${sex}</span>
-      <span class="meta-pill">${type}</span>
-      <span class="meta-pill">${today}</span>
+      <span class="meta-pill">${sex}</span><span class="meta-pill">${type}</span><span class="meta-pill">${today}</span>
     </div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:6px">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      Cliquez sur n'importe quelle section pour la modifier
-    </div>
-    <div id="sections-container"></div>
-  `;
+    <div class="edit-hint"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 9l2-2 6-6 2 2-6 6-2.5.5.5-2.5z" stroke="currentColor" stroke-width="1.2"/></svg> Cliquez sur une section pour la modifier</div>
+    <div id="sections-container"></div>`;
 
   const sections=[
     {key:'motif',label:'Motif de consultation',accent:''},
@@ -1081,9 +575,8 @@ async function generateReport(){
   const cont=document.getElementById('sections-container');
   sections.forEach((s,i)=>{
     const d=document.createElement('div');
-    d.className='rsection';d.id='rs-'+s.key;
-    d.style.transitionDelay=(i*0.07)+'s';
-    d.innerHTML=`<div class="rsection-label">${s.label}</div><div class="rsection-body ${s.accent}" id="rb-${s.key}" contenteditable="true" style="outline:none;cursor:text" title="Cliquez pour modifier"><span class="cursor"></span></div>`;
+    d.className='rsection';d.id='rs-'+s.key;d.style.transitionDelay=(i*0.07)+'s';
+    d.innerHTML=`<div class="rsection-label">${s.label}</div><div class="rsection-body ${s.accent}" id="rb-${s.key}" contenteditable="true" title="Cliquez pour modifier"><span class="cursor"></span></div>`;
     cont.appendChild(d);
     setTimeout(()=>d.classList.add('visible'),i*70);
   });
@@ -1093,8 +586,7 @@ async function generateReport(){
 
   try{
     const res=await fetch('/api/generate',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
+      method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({transcript:liveTranscript,name,age,sex,type,lang,template})
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
@@ -1106,51 +598,34 @@ async function generateReport(){
       const clean=raw.replace(/```json|```/g,'').trim();
       const match=clean.match(/\{[\s\S]*\}/);
       const parsed=JSON.parse(match?match[0]:clean);
-      // Normalize — convert any object values to readable text
-      const normalize=(val)=>{
-        if(!val) return 'Non renseigné';
-        if(typeof val==='string') return val;
-        if(typeof val==='object') return Object.entries(val).map(([k,v])=>`${k} : ${v}`).join('\n');
-        return String(val);
-      };
-      report={
-        motif: normalize(parsed.motif),
-        anamnese: normalize(parsed.anamnese),
-        examen: normalize(parsed.examen),
-        conclusion: normalize(parsed.conclusion),
-        traitement: normalize(parsed.traitement),
-        suivi: normalize(parsed.suivi)
-      };
-    }catch{
-      report=structureTranscript(liveTranscript,name,age,sex,type,histo);
-    }
-    for(const s of sections) await stream('rb-'+s.key, report[s.key]||'Non renseigné');
+      const norm=v=>!v?'Non mentionné':typeof v==='string'?v:typeof v==='object'?Object.entries(v).map(([k,val])=>`${k} : ${val}`).join('\n'):String(v);
+      report={motif:norm(parsed.motif),anamnese:norm(parsed.anamnese),examen:norm(parsed.examen),conclusion:norm(parsed.conclusion),traitement:norm(parsed.traitement),suivi:norm(parsed.suivi)};
+    }catch{report=fallback(liveTranscript,type);}
+    for(const s of sections) await stream('rb-'+s.key,report[s.key]||'Non mentionné');
   }catch(e){
     console.error(e);
-    // Fallback: smart local processing
-    const report=structureTranscript(liveTranscript,name,age,sex,type,histo);
-    for(const s of sections) await stream('rb-'+s.key, report[s.key]||'Non renseigné');
+    const r=fallback(liveTranscript,type);
+    for(const s of sections) await stream('rb-'+s.key,r[s.key]);
+    toast('Mode local — vérifiez la connexion');
   }
 
   btn.classList.remove('loading');
-  btn.innerHTML=`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8h14M10 3l5 5-5 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Générer le compte-rendu IA`;
+  btn.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8h14M10 3l5 5-5 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Générer le compte-rendu IA';
   btn.disabled=false;
-
   document.getElementById('r-chip').className='chip chip-green';
   document.getElementById('r-chip').textContent='✓ Généré';
   document.getElementById('report-footer').classList.add('show');
-
   reportCount++;savedMinutes+=35;
   document.getElementById('s-today').textContent=reportCount;
   document.getElementById('s-saved').textContent=savedMinutes+' min';
   document.getElementById('nav-count').textContent=reportCount;
-  addHistory(name,type);
+  addHistory(name,type,liveTranscript);
 }
 
 async function stream(id,text){
   const el=document.getElementById(id);
   if(!el) return;
-  el.innerHTML='';
+  el.textContent='';
   const words=text.split(' ');
   for(let i=0;i<words.length;i++){
     await new Promise(r=>setTimeout(r,16));
@@ -1158,459 +633,251 @@ async function stream(id,text){
   }
 }
 
-function structureTranscript(text, name, age, sex, type, histo){
-  const t = text.toLowerCase();
-  const sentences = text.match(/[^.!?]+[.!?]*/g) || [text];
-
-  // ── MOTIF — first complaint mentioned
-  const motifKw = ['consulte pour','consultation pour','motif','vient pour','raison','problème','douleur','symptôme','souffre','plainte'];
-  let motif = '';
-  for(const s of sentences){
-    if(motifKw.some(k=>s.toLowerCase().includes(k))){ motif=s.trim(); break; }
-  }
-  if(!motif){
-    // Extract first meaningful sentence
-    motif = sentences.find(s=>s.trim().length>15)?.trim() || text.substring(0,120);
-  }
-
-  // ── ANTECEDENTS & HISTORY keywords
-  const histoKw = ['antécédent','diabète','hypertension','hta','allergie','opération','chirurgie','traitement en cours','suivi pour','depuis','chronic','cancer','cardio'];
-  const histoSents = sentences.filter(s=>histoKw.some(k=>s.toLowerCase().includes(k)));
-
-  // ── EXAM keywords
-  const examKw = ['tension','pression','fréquence','pouls','température','poids','taille','auscultation','examen','palpation','réflexe','saturation','spo2','ecg','radio','analyse','bilan'];
-  const examSents = sentences.filter(s=>examKw.some(k=>s.toLowerCase().includes(k)));
-
-  // ── TREATMENT keywords
-  const traitKw = ['prescris','prescription','ordonnance','médicament','traitement','comprimé','gélule','mg','dose','posologie','antibio','anti','doliprane','paracétamol','ibuprofène','amoxicilline','metformine','sport','régime','chirurgie','opération','injection','vaccin'];
-  const traitSents = sentences.filter(s=>traitKw.some(k=>s.toLowerCase().includes(k)));
-
-  // ── SUIVI keywords
-  const suiviKw = ['revoir','rendez-vous','rdv','suivi','contrôle','semaine','mois','retour','résultat','bilan','urgence','appel','téléphone'];
-  const suiviSents = sentences.filter(s=>suiviKw.some(k=>s.toLowerCase().includes(k)));
-
-  // ── DIAGNOSTIC keywords
-  const diagKw = ['diagnostic','diagnostique','retenu','conclut','conclusion','présente','atteint','souffre de','porteur','cas de','confirme','suspect'];
-  const diagSents = sentences.filter(s=>diagKw.some(k=>s.toLowerCase().includes(k)));
-
-  // Build anamnese = everything not in other categories
-  const usedSents = new Set([...examSents,...traitSents,...suiviSents,...diagSents]);
-  const anamneseSents = sentences.filter(s=>!usedSents.has(s));
-
-  // Format patient header
-  const patientInfo = [name!=='Patient'?name:'', age!=='—'?age+' ans':'', sex!=='—'?sex:''].filter(Boolean).join(', ');
-
-  return {
-    motif: motif || `Consultation de ${type.toLowerCase()}.`,
-
-    anamnese: (histoSents.length ? histoSents.join(' ')+' ' : (histo && histo!=='Aucun antécédent renseigné' ? 'Antécédents : '+histo+'. ' : ''))
-      + (anamneseSents.length ? anamneseSents.join(' ') : text),
-
-    examen: examSents.length
-      ? examSents.join(' ')
-      : 'Examen clinique réalisé lors de la consultation. Paramètres à compléter selon les données recueillies.',
-
-    conclusion: diagSents.length
-      ? diagSents.join(' ')
-      : extractDiagnosis(t, type),
-
-    traitement: traitSents.length
-      ? traitSents.join(' ')
-      : 'Traitement à préciser selon le diagnostic retenu. Cf. ordonnance.',
-
-    suivi: suiviSents.length
-      ? suiviSents.join(' ')
-      : 'Réévaluation clinique à programmer. Patient informé des signes d\'alarme nécessitant une consultation urgente.'
+function fallback(text,type){
+  return{
+    motif:`Consultation de ${(type||'médecine générale').toLowerCase()}.`,
+    anamnese:text,
+    examen:'Non mentionné',
+    conclusion:'Diagnostic à établir.',
+    traitement:'Traitement à préciser.',
+    suivi:'Réévaluation selon évolution.'
   };
 }
 
-function extractDiagnosis(t, type){
-  if(t.includes('diabète')) return 'Diabète de type 2 — prise en charge hygiéno-diététique et médicamenteuse.';
-  if(t.includes('hypertension')||t.includes('hta')) return 'Hypertension artérielle — à équilibrer.';
-  if(t.includes('infection')||t.includes('bactéri')) return 'Infection bactérienne — antibiothérapie indiquée.';
-  if(t.includes('grippe')||t.includes('viral')||t.includes('virus')) return 'Infection virale — traitement symptomatique.';
-  if(t.includes('douleur')) return 'Syndrome douloureux — évaluation en cours.';
-  if(t.includes('anxiété')||t.includes('stress')||t.includes('dépression')) return 'Troubles anxio-dépressifs — prise en charge adaptée.';
-  return `Diagnostic établi lors de la consultation de ${type.toLowerCase()} — cf. dictée.`;
-}
-
-function fallbackFromTranscript(text, name, type){
-  return structureTranscript(text, name, '—', '—', type, '');
-}
-function fallback(){
-  return structureTranscript(transcript||'', 'Patient', '—', '—', 'consultation', '');
-}
-
 // ── HISTORY ──
-function addHistory(name,type){
+function addHistory(name,type,dictee){
   const t=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-  history.unshift({name,type,time:t});
-  const sec=document.getElementById('history-section');
-  const list=document.getElementById('history-list');
+  historyList.unshift({name,type,time:t,dictee,date:new Date().toLocaleDateString('fr-FR')});
+  renderHistoryToday();
+  renderHistoryFull();
+}
+
+function renderHistoryToday(){
+  const sec=document.getElementById('history-today');
+  const list=document.getElementById('history-today-list');
+  if(historyList.length===0){sec.style.display='none';return;}
   sec.style.display='block';
-  list.innerHTML=history.map(h=>`
+  list.innerHTML=historyList.slice(0,5).map(h=>`
     <div class="history-row">
-      <div class="hist-dot"></div>
-      <span class="hist-name">${h.name}</span>
-      <span class="hist-type">${h.type}</span>
-      <span class="hist-time">${h.time}</span>
-    </div>
-  `).join('');
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></span>
+      <span class="hist-name-col">${h.name}</span>
+      <span class="hist-type-col">${h.type}</span>
+      <span class="hist-time-col">${h.time}</span>
+    </div>`).join('');
+}
+
+function renderHistoryFull(){
+  const list=document.getElementById('history-full-list');
+  if(historyList.length===0){
+    list.innerHTML='<div class="history-empty">Aucune consultation enregistrée pour le moment.</div>';return;
+  }
+  list.innerHTML=historyList.map(h=>`
+    <div class="history-row" style="margin-bottom:8px">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></span>
+      <span class="hist-name-col">${h.name}</span>
+      <span class="hist-type-col">${h.type}</span>
+      <span class="hist-time-col">${h.date} ${h.time}</span>
+    </div>`).join('');
 }
 
 // ── ACTIONS ──
 function copyReport(){
-  const secs=document.querySelectorAll('.rsection');
   let txt='COMPTE-RENDU MÉDICAL\n'+new Date().toLocaleDateString('fr-FR')+'\n\n';
-  secs.forEach(s=>{
-    const lbl=s.querySelector('.rsection-label')?.textContent?.trim()||'';
-    const body=s.querySelector('.rsection-body')?.textContent?.trim()||'';
-    txt+=lbl.toUpperCase()+'\n'+body+'\n\n';
+  document.querySelectorAll('.rsection').forEach(s=>{
+    const l=s.querySelector('.rsection-label')?.textContent?.trim()||'';
+    const b=s.querySelector('.rsection-body')?.textContent?.trim()||'';
+    txt+=l.toUpperCase()+'\n'+b+'\n\n';
   });
-  navigator.clipboard.writeText(txt).then(()=>toast('Copié dans le presse-papiers'));
+  navigator.clipboard.writeText(txt).then(()=>toast('Copié !'));
 }
 
-function printReport(){ window.print(); }
+function getDoctorProfile(){
+  try{return JSON.parse(localStorage.getItem('doctorProfile')||'{}');}catch{return {};}
+}
 
 function exportPDF(){
-  const doc = getDoctorProfile();
-  const patientName = document.getElementById('f-name')?.value || 'Patient';
-  const patientAge  = document.getElementById('f-age')?.value  || '';
-  const patientDob  = document.getElementById('f-dob')?.value  || '';
-  const patientSex  = document.getElementById('f-sex')?.value  || '';
-  const consultType = document.getElementById('f-type')?.value || 'Médecine générale';
-  const docName = doc.name || 'Dr. Mohamed-Aziz Zaanoun';
-  const docSpec = doc.spec || consultType;
-  const docTel  = doc.tel  || '+216 XX XXX XXX';
-  const docRpps = doc.rpps || 'XXXXXXXXXX';
-  const docAddr = doc.addr || 'Tunis, Tunisie';
+  const doc=getDoctorProfile();
+  const pn=document.getElementById('f-name')?.value||'Patient';
+  const pa=document.getElementById('f-age')?.value||'';
+  const pd=document.getElementById('f-dob')?.value||'';
+  const ps=document.getElementById('f-sex')?.value||'';
+  const ct=document.getElementById('f-type')?.value||'Médecine générale';
+  const dn=doc.name||'Dr. Médecin';
+  const ds=doc.spec||ct;
+  const dt=doc.tel||'—';
+  const dr=doc.rpps||'—';
+  const da=doc.addr||'—';
+  const get=id=>{const el=document.getElementById('rb-'+id);return el?el.textContent.trim():'';};
+  const today=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  const num='CR-'+Date.now().toString().slice(-6);
 
-  const get = id => { const el=document.getElementById('rb-'+id); return el?el.textContent.trim():''; };
-  const motif      = get('motif');
-  const anamnese   = get('anamnese');
-  const examen     = get('examen');
-  const conclusion = get('conclusion');
-  const traitement = get('traitement');
-  const suivi      = get('suivi');
-
-  const today = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
-  const num   = 'CR-'+Date.now().toString().slice(-6);
-
-  const html = `<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<title>Compte-rendu — ${patientName} — ${today}</title>
+  const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Compte-rendu — ${pn}</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap');
-  *{margin:0;padding:0;box-sizing:border-box}
-  html,body{width:210mm;min-height:297mm;background:#fff}
-  body{font-family:'DM Sans',sans-serif;color:#1c2333;padding:0}
-  .page{width:210mm;min-height:297mm;padding:14mm 16mm 12mm;display:flex;flex-direction:column}
-
-  /* ── HEADER ── */
-  .header{display:flex;justify-content:space-between;align-items:stretch;padding-bottom:14px;border-bottom:2.5px solid #1c2333;margin-bottom:18px}
-  .doctor-info{}
-  .doctor-name{font-family:'EB Garamond',serif;font-size:22px;font-weight:600;color:#1c2333;letter-spacing:-0.3px}
-  .doctor-spec{font-size:12px;color:#5a6478;margin-top:2px;font-weight:500}
-  .doctor-contact{font-size:11px;color:#7a8494;margin-top:8px;line-height:1.7}
-  .header-right{text-align:right;display:flex;flex-direction:column;justify-content:space-between}
-  .doc-type{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#7a8494}
-  .doc-num{font-size:10px;color:#aab0bc;margin-top:2px;font-family:'DM Sans',monospace}
-  .doc-date{font-size:13px;font-weight:600;color:#1c2333;margin-top:auto}
-
-  /* ── PATIENT BAR ── */
-  .patient-bar{background:#f4f6fb;border-radius:8px;padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:0}
-  .patient-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#8a93a8;margin-bottom:2px}
-  .patient-value{font-size:13px;font-weight:600;color:#1c2333}
-  .patient-cell{flex:1;padding:0 14px;border-right:1px solid #dde1ec}
-  .patient-cell:first-child{padding-left:0}
-  .patient-cell:last-child{border-right:none}
-
-  /* ── SECTIONS ── */
-  .sections{flex:1}
-  .section{margin-bottom:16px}
-  .section-label{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#8a93a8;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-  .section-label::after{content:'';flex:1;height:1px;background:#e8ebf2}
-  .section-body{font-size:12.5px;line-height:1.75;color:#2c3444;padding:10px 14px;border-radius:6px;background:#fafbfd;border:1px solid #eaecf4}
-  .section-body.accent-red{border-left:3px solid #e53e3e;background:#fff8f8}
-  .section-body.accent-green{border-left:3px solid #2f855a;background:#f6fff9}
-  .section-body.accent-blue{border-left:3px solid #3182ce;background:#f7faff}
-
-  /* ── PRESCRIPTION BOX ── */
-  .rx-box{border:1.5px solid #1c2333;border-radius:8px;padding:14px 16px;margin-bottom:16px}
-  .rx-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-  .rx-symbol{font-family:'EB Garamond',serif;font-size:28px;font-weight:600;color:#1c2333;line-height:1}
-  .rx-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#5a6478}
-  .rx-body{font-size:13px;line-height:1.85;color:#1c2333;white-space:pre-wrap}
-
-  /* ── FOOTER ── */
-  .footer{margin-top:auto;padding-top:16px;border-top:1px solid #e8ebf2;display:flex;justify-content:space-between;align-items:flex-end}
-  .signature-area{text-align:center}
-  .signature-line{width:180px;border-top:1px solid #1c2333;margin-bottom:6px}
-  .signature-label{font-size:10px;color:#8a93a8}
-  .footer-info{font-size:9.5px;color:#aab0bc;text-align:right;line-height:1.6}
-  .confidential{font-size:8.5px;color:#c8cdd8;margin-top:16px;text-align:center;font-style:italic}
-
-  @media print{
-    html,body{width:210mm;height:297mm}
-    .page{padding:12mm 15mm 10mm}
-  }
-</style>
-</head>
-<body>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;color:#1c2333;background:white;width:210mm;min-height:297mm}
+.page{width:210mm;min-height:297mm;padding:14mm 16mm 12mm;display:flex;flex-direction:column}
+.header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;border-bottom:2.5px solid #1c2333;margin-bottom:18px}
+.doc-name{font-family:'EB Garamond',serif;font-size:22px;font-weight:600;letter-spacing:-0.3px}
+.doc-detail{font-size:11px;color:#5a6478;margin-top:3px;line-height:1.6}
+.hdr-right{text-align:right}
+.hdr-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#8a93a8}
+.hdr-date{font-size:13px;font-weight:600;color:#1c2333;margin-top:4px}
+.patient-bar{background:#f4f6fb;border-radius:8px;padding:10px 16px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:20px}
+.pcell label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#8a93a8;display:block;margin-bottom:2px}
+.pcell span{font-size:13px;font-weight:600;color:#1c2333}
+.section{margin-bottom:16px}
+.slabel{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#8a93a8;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.slabel::after{content:'';flex:1;height:1px;background:#e8ebf2}
+.sbody{font-size:12.5px;line-height:1.75;color:#2c3444;padding:10px 14px;border-radius:6px;background:#fafbfd;border:1px solid #eaecf4}
+.sbody.blue{border-left:3px solid #3182ce;background:#f7faff}
+.sbody.red{border-left:3px solid #e53e3e;background:#fff8f8}
+.rxbox{border:1.5px solid #1c2333;border-radius:8px;padding:14px 16px;margin-bottom:16px}
+.rxhead{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.rxsym{font-family:'EB Garamond',serif;font-size:28px;font-weight:600;line-height:1}
+.footer{margin-top:auto;padding-top:16px;border-top:1px solid #e8ebf2;display:flex;justify-content:space-between;align-items:flex-end}
+.sigline{width:180px;border-top:1px solid #1c2333;margin-bottom:6px}
+.siglabel{font-size:10px;color:#8a93a8}
+.finfo{font-size:9.5px;color:#aab0bc;text-align:right;line-height:1.6}
+.conf{font-size:8.5px;color:#c8cdd8;margin-top:16px;text-align:center;font-style:italic}
+@media print{html,body{width:210mm;height:297mm}}
+</style></head><body>
 <div class="page">
-
-  <!-- HEADER -->
   <div class="header">
-    <div class="doctor-info">
-      <div class="doctor-name">${docName}</div>
-      <div class="doctor-spec">${docSpec}</div>
-      <div class="doctor-contact">
-        ${docAddr}<br>
-        Tél : ${docTel}<br>
-        N° RPPS : ${docRpps}
-      </div>
-    </div>
-    <div class="header-right">
-      <div>
-        <div class="doc-type">Compte-rendu médical</div>
-        <div class="doc-num">Réf. ${num}</div>
-      </div>
-      <div class="doc-date">${today}</div>
-    </div>
+    <div><div class="doc-name">${dn}</div><div class="doc-detail">${ds}<br>${da}<br>Tél : ${dt} • N° RPPS : ${dr}</div></div>
+    <div class="hdr-right"><div class="hdr-label">Compte-rendu médical</div><div class="hdr-date">${today}</div><div style="font-size:10px;color:#aab0bc;margin-top:2px">Réf. ${num}</div></div>
   </div>
-
-  <!-- PATIENT -->
   <div class="patient-bar">
-    <div class="patient-cell">
-      <div class="patient-label">Patient</div>
-      <div class="patient-value">${patientName}</div>
-    </div>
-    <div class="patient-cell">
-      <div class="patient-label">Date de naissance</div>
-      <div class="patient-value">${patientDob||'—'}</div>
-    </div>
-    <div class="patient-cell">
-      <div class="patient-label">Âge</div>
-      <div class="patient-value">${patientAge?patientAge+' ans':'—'}</div>
-    </div>
-    <div class="patient-cell">
-      <div class="patient-label">Sexe</div>
-      <div class="patient-value">${patientSex||'—'}</div>
-    </div>
-    <div class="patient-cell">
-      <div class="patient-label">Spécialité</div>
-      <div class="patient-value">${consultType}</div>
-    </div>
+    <div class="pcell"><label>Patient</label><span>${pn}</span></div>
+    ${pd?`<div class="pcell"><label>Né(e) le</label><span>${pd}</span></div>`:''}
+    ${pa?`<div class="pcell"><label>Âge</label><span>${pa} ans</span></div>`:''}
+    ${ps?`<div class="pcell"><label>Sexe</label><span>${ps}</span></div>`:''}
+    <div class="pcell"><label>Spécialité</label><span>${ct}</span></div>
   </div>
-
-  <!-- SECTIONS -->
-  <div class="sections">
-
-    <div class="section">
-      <div class="section-label">Motif de consultation</div>
-      <div class="section-body">${motif}</div>
-    </div>
-
-    <div class="section">
-      <div class="section-label">Anamnèse</div>
-      <div class="section-body">${anamnese}</div>
-    </div>
-
-    <div class="section">
-      <div class="section-label">Examen clinique</div>
-      <div class="section-body accent-blue">${examen}</div>
-    </div>
-
-    <div class="section">
-      <div class="section-label">Conclusion diagnostique</div>
-      <div class="section-body accent-red">${conclusion}</div>
-    </div>
-
-    <!-- PRESCRIPTION -->
-    <div class="rx-box">
-      <div class="rx-header">
-        <div class="rx-symbol">℞</div>
-        <div class="rx-title">Traitement & Prescriptions</div>
-      </div>
-      <div class="rx-body">${traitement}</div>
-    </div>
-
-    <div class="section">
-      <div class="section-label">Suivi & Recommandations</div>
-      <div class="section-body accent-green">${suivi}</div>
-    </div>
-
-  </div>
-
-  <!-- FOOTER -->
+  <div class="section"><div class="slabel">Motif de consultation</div><div class="sbody">${get('motif')}</div></div>
+  <div class="section"><div class="slabel">Anamnèse</div><div class="sbody">${get('anamnese')}</div></div>
+  <div class="section"><div class="slabel">Examen clinique</div><div class="sbody blue">${get('examen')}</div></div>
+  <div class="section"><div class="slabel">Conclusion diagnostique</div><div class="sbody red">${get('conclusion')}</div></div>
+  <div class="rxbox"><div class="rxhead"><div class="rxsym">℞</div><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#5a6478">Traitement & Prescriptions</div></div><div style="font-size:13px;line-height:1.85;color:#1c2333">${get('traitement')}</div></div>
+  <div class="section"><div class="slabel">Suivi & Recommandations</div><div class="sbody">${get('suivi')}</div></div>
   <div class="footer">
-    <div class="signature-area">
-      <div class="signature-line"></div>
-      <div class="signature-label">Signature & Cachet du médecin</div>
-    </div>
-    <div class="footer-info">
-      Document généré par MedScribe Pro<br>
-      ${today} • Réf. ${num}
-    </div>
+    <div><div class="sigline"></div><div class="siglabel">Signature & Cachet du médecin</div></div>
+    <div class="finfo">Document généré par MedScribe Pro<br>${today} • Réf. ${num}</div>
   </div>
-
-  <div class="confidential">Document médical confidentiel — usage strictement médical</div>
-
+  <div class="conf">Document médical confidentiel — usage strictement médical</div>
 </div>
 <script>window.onload=()=>{window.print();}<\/script>
-</body>
-</html>`;
-
-  const win = window.open('', '_blank');
-  win.document.write(html);
-  win.document.close();
+</body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();
 }
 
 function exportOrdonnance(){
-  const doc = getDoctorProfile();
-  const docName = doc.name || 'Dr. Mohamed-Aziz Zaanoun';
-  const docSpec = doc.spec || 'Médecine générale';
-  const docTel  = doc.tel  || '+216 XX XXX XXX';
-  const docRpps = doc.rpps || 'XXXXXXXXXX';
-  const docAddr = doc.addr || 'Tunis, Tunisie';
-  const patientName = document.getElementById('f-name')?.value || 'Patient';
-  const patientAge  = document.getElementById('f-age')?.value  || '';
-  const patientDob  = document.getElementById('f-dob')?.value  || '';
-  const consultType = document.getElementById('f-type')?.value || 'Médecine générale';
-  const traitement  = document.getElementById('rb-traitement')?.textContent?.trim() || 'Non renseigné';
-  const today = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
-  const num = 'ORD-'+Date.now().toString().slice(-6);
+  const doc=getDoctorProfile();
+  const dn=doc.name||'Dr. Médecin';
+  const ds=doc.spec||'Médecine générale';
+  const dt=doc.tel||'—';
+  const dr=doc.rpps||'—';
+  const da=doc.addr||'—';
+  const pn=document.getElementById('f-name')?.value||'Patient';
+  const pa=document.getElementById('f-age')?.value||'';
+  const pd=document.getElementById('f-dob')?.value||'';
+  const ct=document.getElementById('f-type')?.value||'Médecine générale';
+  const traitement=document.getElementById('rb-traitement')?.textContent?.trim()||'';
+  const today=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  const num='ORD-'+Date.now().toString().slice(-6);
+  const lines=traitement.split(/[.\n;]/).map(l=>l.trim()).filter(l=>l.length>3);
+  const rxItems=lines.map((l,i)=>`<div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #eef0f5;align-items:flex-start"><div style="width:22px;height:22px;border-radius:50%;background:#1c2333;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${i+1}</div><div style="font-size:14px;line-height:1.6;color:#1c2333">${l}</div></div>`).join('');
 
-  // Format traitement as numbered list
-  const lines = traitement.split(/[.\n;]/).map(l=>l.trim()).filter(l=>l.length>3);
-  const rxItems = lines.map((l,i)=>`
-    <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #eef0f5;align-items:flex-start">
-      <div style="width:22px;height:22px;border-radius:50%;background:#1c2333;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">${i+1}</div>
-      <div style="font-size:14px;line-height:1.6;color:#1c2333">${l}</div>
-    </div>`).join('');
-
-  const html=`<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<title>Ordonnance — ${patientName}</title>
+  const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ordonnance — ${pn}</title>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'DM Sans',sans-serif;background:#fff;color:#1c2333;width:210mm;min-height:297mm}
-  .page{width:210mm;min-height:297mm;padding:14mm 16mm 12mm;display:flex;flex-direction:column}
-  .header{display:flex;justify-content:space-between;padding-bottom:14px;border-bottom:3px solid #1c2333;margin-bottom:20px}
-  .doctor-name{font-family:'EB Garamond',serif;font-size:24px;font-weight:600;letter-spacing:-0.3px}
-  .doctor-detail{font-size:11px;color:#5a6478;margin-top:3px}
-  .doc-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#8a93a8;text-align:right}
-  .doc-date{font-size:13px;font-weight:600;color:#1c2333;margin-top:4px;text-align:right}
-  .patient-box{background:#f4f6fb;border-radius:8px;padding:12px 16px;margin-bottom:24px;display:flex;gap:24px}
-  .patient-field label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#8a93a8;display:block;margin-bottom:2px}
-  .patient-field span{font-size:13px;font-weight:600;color:#1c2333}
-  .rx-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-  .rx-symbol{font-family:'EB Garamond',serif;font-size:52px;font-weight:600;color:#1c2333;line-height:1}
-  .rx-sub{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#5a6478}
-  .rx-items{flex:1;margin-bottom:24px}
-  .footer{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;padding-top:20px;border-top:1px solid #e8ebf2}
-  .sig-line{width:200px;border-top:1.5px solid #1c2333;margin-bottom:6px}
-  .sig-label{font-size:10px;color:#8a93a8}
-  .stamp-box{width:110px;height:110px;border:1.5px dashed #c8cdd8;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#c8cdd8;text-align:center;line-height:1.5}
-  .footer-note{font-size:9px;color:#c8cdd8;text-align:center;margin-top:20px;font-style:italic}
-  @media print{body,html{width:210mm;height:297mm}}
-</style>
-</head>
-<body>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#fff;color:#1c2333;width:210mm;min-height:297mm}
+.page{width:210mm;min-height:297mm;padding:14mm 16mm 12mm;display:flex;flex-direction:column}
+.header{display:flex;justify-content:space-between;padding-bottom:14px;border-bottom:3px solid #1c2333;margin-bottom:20px}
+.doc-name{font-family:'EB Garamond',serif;font-size:24px;font-weight:600;letter-spacing:-0.3px}
+.doc-detail{font-size:11px;color:#5a6478;margin-top:3px}
+.hdr-right{text-align:right}
+.patient-box{background:#f4f6fb;border-radius:8px;padding:12px 16px;margin-bottom:24px;display:flex;gap:24px;flex-wrap:wrap}
+.pf label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#8a93a8;display:block;margin-bottom:2px}
+.pf span{font-size:13px;font-weight:600;color:#1c2333}
+.rxhead{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.rxsym{font-family:'EB Garamond',serif;font-size:52px;font-weight:600;color:#1c2333;line-height:1}
+.footer{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;padding-top:20px;border-top:1px solid #e8ebf2}
+.sigline{width:200px;border-top:1.5px solid #1c2333;margin-bottom:6px}
+.siglabel{font-size:10px;color:#8a93a8}
+.stamp{width:110px;height:110px;border:1.5px dashed #c8cdd8;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#c8cdd8;text-align:center}
+.note{font-size:9px;color:#c8cdd8;text-align:center;margin-top:20px;font-style:italic}
+@media print{body,html{width:210mm;height:297mm}}
+</style></head><body>
 <div class="page">
   <div class="header">
-    <div>
-      <div class="doctor-name">${docName}</div>
-      <div class="doctor-detail">${docSpec} • ${docAddr}</div>
-      <div class="doctor-detail" style="margin-top:2px">Tél : ${docTel} • N° RPPS : ${docRpps}</div>
-    </div>
-    <div>
-      <div class="doc-label">Ordonnance médicale</div>
-      <div class="doc-date">${today}</div>
-      <div style="font-size:10px;color:#aab0bc;text-align:right;margin-top:2px">Réf. ${num}</div>
-    </div>
+    <div><div class="doc-name">${dn}</div><div class="doc-detail">${ds} • ${da}</div><div class="doc-detail">Tél : ${dt} • N° RPPS : ${dr}</div></div>
+    <div class="hdr-right"><div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#8a93a8">Ordonnance médicale</div><div style="font-size:13px;font-weight:600;color:#1c2333;margin-top:4px">${today}</div><div style="font-size:10px;color:#aab0bc;margin-top:2px">Réf. ${num}</div></div>
   </div>
-
   <div class="patient-box">
-    <div class="patient-field"><label>Patient</label><span>${patientName}</span></div>
-    ${patientAge?`<div class="patient-field"><label>Âge</label><span>${patientAge} ans</span></div>`:''}
-    ${patientDob?`<div class="patient-field"><label>Né(e) le</label><span>${patientDob}</span></div>`:''}
-    <div class="patient-field"><label>Date</label><span>${today}</span></div>
+    <div class="pf"><label>Patient</label><span>${pn}</span></div>
+    ${pa?`<div class="pf"><label>Âge</label><span>${pa} ans</span></div>`:''}
+    ${pd?`<div class="pf"><label>Né(e) le</label><span>${pd}</span></div>`:''}
+    <div class="pf"><label>Date</label><span>${today}</span></div>
   </div>
-
-  <div class="rx-header">
-    <div class="rx-symbol">℞</div>
-    <div><div class="rx-sub">Prescriptions médicales</div><div style="font-size:12px;color:#8a93a8;margin-top:2px">À délivrer en pharmacie sur présentation de cette ordonnance</div></div>
+  <div class="rxhead">
+    <div class="rxsym">℞</div>
+    <div><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#5a6478">Prescriptions médicales</div><div style="font-size:12px;color:#8a93a8;margin-top:2px">À délivrer en pharmacie sur présentation de cette ordonnance</div></div>
   </div>
-
-  <div class="rx-items">
-    ${rxItems || `<div style="font-size:14px;color:#5a6478;padding:16px 0">Aucune prescription renseignée</div>`}
-  </div>
-
-  <div class="footer">
-    <div>
-      <div class="sig-line"></div>
-      <div class="sig-label">Signature du médecin</div>
-    </div>
-    <div class="stamp-box">Cachet<br>du médecin</div>
-  </div>
-
-  <div class="footer-note">Ordonnance valable 3 mois à compter de la date de prescription • Document médical confidentiel</div>
+  <div style="flex:1">${rxItems||'<div style="font-size:14px;color:#5a6478;padding:16px 0">Aucune prescription renseignée</div>'}</div>
+  <div class="footer"><div><div class="sigline"></div><div class="siglabel">Signature du médecin</div></div><div class="stamp">Cachet<br>du médecin</div></div>
+  <div class="note">Ordonnance valable 3 mois • Document médical confidentiel</div>
 </div>
 <script>window.onload=()=>{window.print();}<\/script>
-</body>
-</html>`;
-
-  const win=window.open('','_blank');
-  win.document.write(html);
-  win.document.close();
+</body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();
 }
 
-function toggleProfile(){
-  const fields=document.getElementById('profile-fields');
-  const toggle=document.getElementById('profile-toggle');
-  if(fields.style.display==='none'){
-    fields.style.display='block';
-    toggle.textContent='▲ Fermer';
-  } else {
-    fields.style.display='none';
-    toggle.textContent='▼ Modifier';
-  }
-}
-
+// ── DOCTOR PROFILE ──
 function saveDoctorProfile(){
-  const profile={
-    name: document.getElementById('doc-name')?.value||'',
-    spec: document.getElementById('doc-spec')?.value||'',
-    tel:  document.getElementById('doc-tel')?.value||'',
-    rpps: document.getElementById('doc-rpps')?.value||'',
-    addr: document.getElementById('doc-address')?.value||''
-  };
-  localStorage.setItem('doctorProfile', JSON.stringify(profile));
-  toast('Profil médecin sauvegardé ✓');
+  localStorage.setItem('doctorProfile',JSON.stringify({
+    name:document.getElementById('doc-name')?.value||'',
+    spec:document.getElementById('doc-spec')?.value||'',
+    tel: document.getElementById('doc-tel')?.value||'',
+    rpps:document.getElementById('doc-rpps')?.value||'',
+    addr:document.getElementById('doc-address')?.value||''
+  }));
+  const n=document.getElementById('doc-name')?.value;
+  const s=document.getElementById('doc-spec')?.value;
+  if(n){document.getElementById('sidebar-doc-name').textContent=n;document.getElementById('avatar-initials').textContent=n.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();}
+  if(s) document.getElementById('sidebar-doc-spec').textContent=s;
+  toast('Profil sauvegardé ✓');
 }
 
 function loadDoctorProfile(){
   try{
     const p=JSON.parse(localStorage.getItem('doctorProfile')||'{}');
-    if(p.name) document.getElementById('doc-name').value=p.name;
-    if(p.spec) document.getElementById('doc-spec').value=p.spec;
-    if(p.tel)  document.getElementById('doc-tel').value=p.tel;
+    if(p.name){document.getElementById('doc-name').value=p.name;document.getElementById('sidebar-doc-name').textContent=p.name;document.getElementById('avatar-initials').textContent=p.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();}
+    if(p.spec){document.getElementById('doc-spec').value=p.spec;document.getElementById('sidebar-doc-spec').textContent=p.spec;}
+    if(p.tel) document.getElementById('doc-tel').value=p.tel;
     if(p.rpps) document.getElementById('doc-rpps').value=p.rpps;
     if(p.addr) document.getElementById('doc-address').value=p.addr;
   }catch{}
 }
 
-function getDoctorProfile(){
-  try{ return JSON.parse(localStorage.getItem('doctorProfile')||'{}'); }
-  catch{ return {}; }
+function savePreferences(){
+  localStorage.setItem('medscribePrefs',JSON.stringify({
+    lang:document.getElementById('f-lang')?.value||'fr',
+    template:document.getElementById('f-template')?.value||'standard'
+  }));
+  toast('Préférences sauvegardées ✓');
 }
 
+function loadPreferences(){
+  try{
+    const p=JSON.parse(localStorage.getItem('medscribePrefs')||'{}');
+    if(p.lang) document.getElementById('f-lang').value=p.lang;
+    if(p.template) document.getElementById('f-template').value=p.template;
+  }catch{}
+}
+
+// ── MISC ──
 function newConsult(){
   clearForm();
   document.getElementById('report-empty').style.display='flex';
@@ -1622,11 +889,14 @@ function newConsult(){
   document.getElementById('transcript-text').textContent='';
   document.getElementById('gen-btn').disabled=true;
   setRecState('idle');transcript='';
-  toast('Nouvelle consultation initialisée');
+  document.getElementById('mode-label').textContent='Prêt';
+  toast('Nouvelle consultation');
 }
 
 function clearForm(){
-  ['f-name','f-dob','f-age','f-history'].forEach(id=>document.getElementById(id).value='');
+  ['f-name','f-dob','f-age','f-history'].forEach(id=>{
+    const el=document.getElementById(id);if(el) el.value='';
+  });
 }
 
 function toast(msg){
