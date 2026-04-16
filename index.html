@@ -1033,35 +1033,9 @@ DICTÉE EXACTE DU MÉDECIN (base-toi UNIQUEMENT sur ce texte) :
 Réponds UNIQUEMENT en JSON valide, sans backticks, sans markdown, sans texte avant ou après. Clés exactes :
 {"motif":"...","anamnese":"...","examen":"...","conclusion":"...","traitement":"...","suivi":"..."}`;
 
-  try{
-    const res=await fetch('/api/generate',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ prompt })
-    });
-    if(!res.ok){
-      const err=await res.text();
-      throw new Error('API '+res.status+': '+err);
-    }
-    const data=await res.json();
-    const raw=data.text||'{}';
-    let report;
-    try{
-      report=JSON.parse(raw.replace(/```json|```/g,'').trim());
-    }catch(parseErr){
-      // Claude didn't return pure JSON — extract it
-      const match=raw.match(/\{[\s\S]*\}/);
-      if(match) report=JSON.parse(match[0]);
-      else throw new Error('JSON invalide: '+raw.substring(0,100));
-    }
-    for(const s of sections) await stream('rb-'+s.key, report[s.key]||'Non renseigné');
-  }catch(e){
-    console.error('Erreur API:', e);
-    // Instead of generic fallback, show the transcript split into sections
-    const rp=fallbackFromTranscript(liveTranscript, name, type);
-    for(const s of sections) await stream('rb-'+s.key, rp[s.key]);
-    toast('Mode hors-ligne — compte-rendu basé sur votre dictée');
-  }
+  // Smart local processing — no API needed
+  const report = structureTranscript(liveTranscript, name, age, sex, type, histo);
+  for(const s of sections) await stream('rb-'+s.key, report[s.key]||'Non renseigné');
 
   btn.classList.remove('loading');
   btn.innerHTML=`<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8h14M10 3l5 5-5 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Générer le compte-rendu IA`;
@@ -1089,20 +1063,87 @@ async function stream(id,text){
   }
 }
 
-function fallbackFromTranscript(text, name, type){
-  // Intelligent split based on transcript content
-  return{
-    motif: `Consultation de ${type.toLowerCase()} — dictée vocale enregistrée.`,
-    anamnese: text,
-    examen: 'Examen clinique réalisé lors de la consultation. Données à compléter.',
-    conclusion: 'Diagnostic à établir sur la base des éléments recueillis lors de la dictée.',
-    traitement: 'Traitement à renseigner selon le diagnostic retenu.',
-    suivi: 'Réévaluation selon évolution clinique. Patient informé des signes d\'alarme.'
+function structureTranscript(text, name, age, sex, type, histo){
+  const t = text.toLowerCase();
+  const sentences = text.match(/[^.!?]+[.!?]*/g) || [text];
+
+  // ── MOTIF — first complaint mentioned
+  const motifKw = ['consulte pour','consultation pour','motif','vient pour','raison','problème','douleur','symptôme','souffre','plainte'];
+  let motif = '';
+  for(const s of sentences){
+    if(motifKw.some(k=>s.toLowerCase().includes(k))){ motif=s.trim(); break; }
+  }
+  if(!motif){
+    // Extract first meaningful sentence
+    motif = sentences.find(s=>s.trim().length>15)?.trim() || text.substring(0,120);
+  }
+
+  // ── ANTECEDENTS & HISTORY keywords
+  const histoKw = ['antécédent','diabète','hypertension','hta','allergie','opération','chirurgie','traitement en cours','suivi pour','depuis','chronic','cancer','cardio'];
+  const histoSents = sentences.filter(s=>histoKw.some(k=>s.toLowerCase().includes(k)));
+
+  // ── EXAM keywords
+  const examKw = ['tension','pression','fréquence','pouls','température','poids','taille','auscultation','examen','palpation','réflexe','saturation','spo2','ecg','radio','analyse','bilan'];
+  const examSents = sentences.filter(s=>examKw.some(k=>s.toLowerCase().includes(k)));
+
+  // ── TREATMENT keywords
+  const traitKw = ['prescris','prescription','ordonnance','médicament','traitement','comprimé','gélule','mg','dose','posologie','antibio','anti','doliprane','paracétamol','ibuprofène','amoxicilline','metformine','sport','régime','chirurgie','opération','injection','vaccin'];
+  const traitSents = sentences.filter(s=>traitKw.some(k=>s.toLowerCase().includes(k)));
+
+  // ── SUIVI keywords
+  const suiviKw = ['revoir','rendez-vous','rdv','suivi','contrôle','semaine','mois','retour','résultat','bilan','urgence','appel','téléphone'];
+  const suiviSents = sentences.filter(s=>suiviKw.some(k=>s.toLowerCase().includes(k)));
+
+  // ── DIAGNOSTIC keywords
+  const diagKw = ['diagnostic','diagnostique','retenu','conclut','conclusion','présente','atteint','souffre de','porteur','cas de','confirme','suspect'];
+  const diagSents = sentences.filter(s=>diagKw.some(k=>s.toLowerCase().includes(k)));
+
+  // Build anamnese = everything not in other categories
+  const usedSents = new Set([...examSents,...traitSents,...suiviSents,...diagSents]);
+  const anamneseSents = sentences.filter(s=>!usedSents.has(s));
+
+  // Format patient header
+  const patientInfo = [name!=='Patient'?name:'', age!=='—'?age+' ans':'', sex!=='—'?sex:''].filter(Boolean).join(', ');
+
+  return {
+    motif: motif || `Consultation de ${type.toLowerCase()}.`,
+
+    anamnese: (histoSents.length ? histoSents.join(' ')+' ' : (histo && histo!=='Aucun antécédent renseigné' ? 'Antécédents : '+histo+'. ' : ''))
+      + (anamneseSents.length ? anamneseSents.join(' ') : text),
+
+    examen: examSents.length
+      ? examSents.join(' ')
+      : 'Examen clinique réalisé lors de la consultation. Paramètres à compléter selon les données recueillies.',
+
+    conclusion: diagSents.length
+      ? diagSents.join(' ')
+      : extractDiagnosis(t, type),
+
+    traitement: traitSents.length
+      ? traitSents.join(' ')
+      : 'Traitement à préciser selon le diagnostic retenu. Cf. ordonnance.',
+
+    suivi: suiviSents.length
+      ? suiviSents.join(' ')
+      : 'Réévaluation clinique à programmer. Patient informé des signes d\'alarme nécessitant une consultation urgente.'
   };
 }
 
+function extractDiagnosis(t, type){
+  if(t.includes('diabète')) return 'Diabète de type 2 — prise en charge hygiéno-diététique et médicamenteuse.';
+  if(t.includes('hypertension')||t.includes('hta')) return 'Hypertension artérielle — à équilibrer.';
+  if(t.includes('infection')||t.includes('bactéri')) return 'Infection bactérienne — antibiothérapie indiquée.';
+  if(t.includes('grippe')||t.includes('viral')||t.includes('virus')) return 'Infection virale — traitement symptomatique.';
+  if(t.includes('douleur')) return 'Syndrome douloureux — évaluation en cours.';
+  if(t.includes('anxiété')||t.includes('stress')||t.includes('dépression')) return 'Troubles anxio-dépressifs — prise en charge adaptée.';
+  return `Diagnostic établi lors de la consultation de ${type.toLowerCase()} — cf. dictée.`;
+}
+
+function fallbackFromTranscript(text, name, type){
+  return structureTranscript(text, name, '—', '—', type, '');
+}
 function fallback(){
-  return fallbackFromTranscript(transcript||'Dictée non disponible','Patient','consultation');
+  return structureTranscript(transcript||'', 'Patient', '—', '—', 'consultation', '');
 }
 
 // ── HISTORY ──
