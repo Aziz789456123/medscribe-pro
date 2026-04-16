@@ -909,7 +909,10 @@ function stopRec(){
   resetWave();
   document.getElementById('rec-timer').style.display='none';
 
-  const final=transcript.trim();
+  // Read from DOM as safety net — speech recognition may not have finalized
+  const domText=document.getElementById('transcript-text').textContent.trim();
+  const final=(transcript||domText).trim();
+
   if(!final){
     toast('Aucune parole détectée — réessayez');
     setRecState('idle');
@@ -921,7 +924,11 @@ function stopRec(){
   document.getElementById('transcript-wrap').classList.add('show');
   setRecState('done');
   document.getElementById('mode-label').textContent='Transcription ✓';
-  document.getElementById('gen-btn').disabled=false;
+  // Force enable button
+  const btn=document.getElementById('gen-btn');
+  btn.disabled=false;
+  btn.style.opacity='1';
+  btn.style.cursor='pointer';
 }
 
 function setRecState(s){
