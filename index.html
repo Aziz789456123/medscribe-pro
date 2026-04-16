@@ -1203,18 +1203,194 @@ function copyReport(){
 function printReport(){ window.print(); }
 
 function exportPDF(){
-  // Gather all report data
-  const sections = document.querySelectorAll('.rsection');
-  const meta = document.getElementById('report-meta')?.innerHTML || '';
-  let sectionsHTML = '';
-  sections.forEach(s => {
-    const label = s.querySelector('.rsection-label')?.textContent?.trim() || '';
-    const body = s.querySelector('.rsection-body')?.textContent?.trim() || '';
-    sectionsHTML += `
-      <div style="margin-bottom:20px;">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#666;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #e0e0e0;">${label}</div>
-        <div style="font-size:13px;line-height:1.7;color:#1a1a1a;">${body}</div>
-      </div>`;
+  const patientName = document.getElementById('f-name')?.value || 'Patient';
+  const patientAge  = document.getElementById('f-age')?.value  || '';
+  const patientDob  = document.getElementById('f-dob')?.value  || '';
+  const patientSex  = document.getElementById('f-sex')?.value  || '';
+  const consultType = document.getElementById('f-type')?.value || 'Médecine générale';
+
+  const get = id => { const el=document.getElementById('rb-'+id); return el?el.textContent.trim():''; };
+  const motif      = get('motif');
+  const anamnese   = get('anamnese');
+  const examen     = get('examen');
+  const conclusion = get('conclusion');
+  const traitement = get('traitement');
+  const suivi      = get('suivi');
+
+  const today = new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  const num   = 'CR-'+Date.now().toString().slice(-6);
+
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Compte-rendu — ${patientName} — ${today}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:210mm;min-height:297mm;background:#fff}
+  body{font-family:'DM Sans',sans-serif;color:#1c2333;padding:0}
+  .page{width:210mm;min-height:297mm;padding:14mm 16mm 12mm;display:flex;flex-direction:column}
+
+  /* ── HEADER ── */
+  .header{display:flex;justify-content:space-between;align-items:stretch;padding-bottom:14px;border-bottom:2.5px solid #1c2333;margin-bottom:18px}
+  .doctor-info{}
+  .doctor-name{font-family:'EB Garamond',serif;font-size:22px;font-weight:600;color:#1c2333;letter-spacing:-0.3px}
+  .doctor-spec{font-size:12px;color:#5a6478;margin-top:2px;font-weight:500}
+  .doctor-contact{font-size:11px;color:#7a8494;margin-top:8px;line-height:1.7}
+  .header-right{text-align:right;display:flex;flex-direction:column;justify-content:space-between}
+  .doc-type{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#7a8494}
+  .doc-num{font-size:10px;color:#aab0bc;margin-top:2px;font-family:'DM Sans',monospace}
+  .doc-date{font-size:13px;font-weight:600;color:#1c2333;margin-top:auto}
+
+  /* ── PATIENT BAR ── */
+  .patient-bar{background:#f4f6fb;border-radius:8px;padding:10px 16px;margin-bottom:20px;display:flex;align-items:center;gap:0}
+  .patient-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#8a93a8;margin-bottom:2px}
+  .patient-value{font-size:13px;font-weight:600;color:#1c2333}
+  .patient-cell{flex:1;padding:0 14px;border-right:1px solid #dde1ec}
+  .patient-cell:first-child{padding-left:0}
+  .patient-cell:last-child{border-right:none}
+
+  /* ── SECTIONS ── */
+  .sections{flex:1}
+  .section{margin-bottom:16px}
+  .section-label{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#8a93a8;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .section-label::after{content:'';flex:1;height:1px;background:#e8ebf2}
+  .section-body{font-size:12.5px;line-height:1.75;color:#2c3444;padding:10px 14px;border-radius:6px;background:#fafbfd;border:1px solid #eaecf4}
+  .section-body.accent-red{border-left:3px solid #e53e3e;background:#fff8f8}
+  .section-body.accent-green{border-left:3px solid #2f855a;background:#f6fff9}
+  .section-body.accent-blue{border-left:3px solid #3182ce;background:#f7faff}
+
+  /* ── PRESCRIPTION BOX ── */
+  .rx-box{border:1.5px solid #1c2333;border-radius:8px;padding:14px 16px;margin-bottom:16px}
+  .rx-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .rx-symbol{font-family:'EB Garamond',serif;font-size:28px;font-weight:600;color:#1c2333;line-height:1}
+  .rx-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#5a6478}
+  .rx-body{font-size:13px;line-height:1.85;color:#1c2333;white-space:pre-wrap}
+
+  /* ── FOOTER ── */
+  .footer{margin-top:auto;padding-top:16px;border-top:1px solid #e8ebf2;display:flex;justify-content:space-between;align-items:flex-end}
+  .signature-area{text-align:center}
+  .signature-line{width:180px;border-top:1px solid #1c2333;margin-bottom:6px}
+  .signature-label{font-size:10px;color:#8a93a8}
+  .footer-info{font-size:9.5px;color:#aab0bc;text-align:right;line-height:1.6}
+  .confidential{font-size:8.5px;color:#c8cdd8;margin-top:16px;text-align:center;font-style:italic}
+
+  @media print{
+    html,body{width:210mm;height:297mm}
+    .page{padding:12mm 15mm 10mm}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="doctor-info">
+      <div class="doctor-name">Dr. Mohamed-Aziz Zaanoun</div>
+      <div class="doctor-spec">${consultType}</div>
+      <div class="doctor-contact">
+        Cabinet médical • Tunis, Tunisie<br>
+        Tél : +216 XX XXX XXX<br>
+        N° RPPS : XXXXXXXXXX
+      </div>
+    </div>
+    <div class="header-right">
+      <div>
+        <div class="doc-type">Compte-rendu médical</div>
+        <div class="doc-num">Réf. ${num}</div>
+      </div>
+      <div class="doc-date">${today}</div>
+    </div>
+  </div>
+
+  <!-- PATIENT -->
+  <div class="patient-bar">
+    <div class="patient-cell">
+      <div class="patient-label">Patient</div>
+      <div class="patient-value">${patientName}</div>
+    </div>
+    <div class="patient-cell">
+      <div class="patient-label">Date de naissance</div>
+      <div class="patient-value">${patientDob||'—'}</div>
+    </div>
+    <div class="patient-cell">
+      <div class="patient-label">Âge</div>
+      <div class="patient-value">${patientAge?patientAge+' ans':'—'}</div>
+    </div>
+    <div class="patient-cell">
+      <div class="patient-label">Sexe</div>
+      <div class="patient-value">${patientSex||'—'}</div>
+    </div>
+    <div class="patient-cell">
+      <div class="patient-label">Spécialité</div>
+      <div class="patient-value">${consultType}</div>
+    </div>
+  </div>
+
+  <!-- SECTIONS -->
+  <div class="sections">
+
+    <div class="section">
+      <div class="section-label">Motif de consultation</div>
+      <div class="section-body">${motif}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Anamnèse</div>
+      <div class="section-body">${anamnese}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Examen clinique</div>
+      <div class="section-body accent-blue">${examen}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Conclusion diagnostique</div>
+      <div class="section-body accent-red">${conclusion}</div>
+    </div>
+
+    <!-- PRESCRIPTION -->
+    <div class="rx-box">
+      <div class="rx-header">
+        <div class="rx-symbol">℞</div>
+        <div class="rx-title">Traitement & Prescriptions</div>
+      </div>
+      <div class="rx-body">${traitement}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Suivi & Recommandations</div>
+      <div class="section-body accent-green">${suivi}</div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="signature-area">
+      <div class="signature-line"></div>
+      <div class="signature-label">Signature & Cachet du médecin</div>
+    </div>
+    <div class="footer-info">
+      Document généré par MedScribe Pro<br>
+      ${today} • Réf. ${num}
+    </div>
+  </div>
+
+  <div class="confidential">Document médical confidentiel — usage strictement médical</div>
+
+</div>
+<script>window.onload=()=>{window.print();}<\/script>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+}
   });
 
   const today = new Date().toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'});
