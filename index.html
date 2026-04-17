@@ -602,7 +602,11 @@ async function showApp(user){
 let blockedUser = null;
 
 function showBlocked(user){
-  if(user) blockedUser = user;
+  if(user){
+    blockedUser = user;
+    localStorage.setItem('ms_blocked_email', user.email);
+    localStorage.setItem('ms_blocked_id', user.id);
+  }
   document.getElementById('auth-blocked').classList.add('active');
 }
 
@@ -611,14 +615,13 @@ async function redirectToStripe(){
   btn.disabled = true;
   btn.textContent = 'Redirection...';
   try {
-    // Try to get user from session or use stored blockedUser
-    const session = await sb.auth.getSession();
-    const user = session.data.session?.user || blockedUser;
-    if(!user){ showLogin(); return; }
+    const email = blockedUser?.email || localStorage.getItem('ms_blocked_email');
+    const userId = blockedUser?.id || localStorage.getItem('ms_blocked_id');
+    if(!email || !userId){ toast('Session expirée — reconnectez-vous'); showLogin(); return; }
     const res = await fetch('/api/stripe-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: user.email, userId: user.id })
+      body: JSON.stringify({ email, userId })
     });
     const data = await res.json();
     if(data.url) window.location.href = data.url;
