@@ -19,10 +19,19 @@ export default async function handler(req, res) {
       notMentioned: "Non mentionné"
     },
     tn: {
-      system: "Tu es un médecin assistant expert spécialisé dans les consultations médicales en Tunisie. Tu comprends parfaitement le mélange de français médical et d'arabe tunisien dialectal (darija). Tu rédiges des comptes-rendus médicaux professionnels en français standard.",
-      instruction: `La dictée contient du français et de l'arabe tunisien dialectal mélangés (darija). 
-Vocabulaire tunisien courant: lyoum/elyoum=aujourd'hui, barcha=beaucoup, chwaya=un peu, mrigel=bien/debout, maridh=malade, yوجع/wجع=douleur, rass=tête, kalb=cœur, kerch=ventre, dhar=dos, skhana=fièvre, demm=sang, berd=rhume, mafish=il n'y a pas, aandou=il a, maandoush=il n'a pas.
-Traduis et structure TOUT le contenu en français médical professionnel. Ne laisse aucun mot en arabe dans le compte-rendu final.`,
+      system: "Tu es un médecin assistant expert spécialisé dans les consultations médicales en Tunisie. Tu maîtrises parfaitement le darija tunisien médical et tu rédiges des comptes-rendus en français médical standard.",
+      instruction: `La dictée est en darija tunisien et/ou français mélangés. Traduis et structure tout en français médical professionnel.
+
+DICTIONNAIRE DARIJA MÉDICAL:
+Corps: rass=tête, odhon=oreille, 3ain=œil, anf=nez, ferr=bouche, 3onba=cou, ktef=épaule, dra3=bras, id=main, kalb=cœur, s'dr=poitrine, ri7a=poumon, kerch=abdomen, klawi=reins, dhar=dos, rkoba=genou, rejel=jambe, 3adem=os, dam=sang, jeld=peau.
+Symptômes: yewja3ni/waja3=douleur, s'khana/7arariya=fièvre, berd=rhume, ko77a=toux, tkayyef=vomissement, 7arsha=démangeaison, dawkha=vertige, 3ayet/ta3ben=fatigue, ishal=diarrhée, 7bess=constipation, wrem=œdème, 7rajja=brûlure, r3asha=tremblement, 3araq=transpiration, ma yen3emshi=difficulté à marcher.
+Temps: lyoum/elyoum=aujourd'hui, ems=hier, tawa=maintenant, barsha wa9t=depuis longtemps, kol yoem=chaque jour, sbé7=matin, 3chia=soir, el lila=cette nuit.
+Quantité: barcha=beaucoup, chwaya=un peu, da7wa=toujours, ma7yejna=jamais.
+Antécédents: sokar=diabète, darr d'dam=hypertension, 9alb=cardiopathie, 7ساسية=allergie, 3amalt 3maliya=antécédent chirurgical.
+Médicaments: dwa=médicament, 7boba=comprimé, shar6=sirop, 7o9na=injection, marham=pommade, 9a6ra=gouttes.
+Général: mrigel=en bonne forme, maridh=malade, fama=il y a, mafish=absent, 3andou=il/elle a, maandoush=n'a pas.
+
+Traduis TOUT en français médical. Ne laisse aucun mot en arabe dans le compte-rendu final.`,
       notMentioned: "Non mentionné"
     },
     ar: {
