@@ -387,7 +387,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
           <div class="field-grid">
             <div class="field">
               <label>Langue</label>
-              <select id="f-lang"><option value="fr">🇫🇷 Français</option><option value="tn">🇹🇳 Français + Arabe (Tunisie)</option><option value="ar">🇹🇳 Arabe</option><option value="en">🇬🇧 Anglais</option></select>
+              <select id="f-lang"><option value="fr">🇫🇷 Français</option><option value="tn">🇹🇳 Tunisien (Whisper IA)</option><option value="ar">🇸🇦 Arabe</option><option value="en">🇬🇧 Anglais</option></select>
             </div>
             <div class="field">
               <label>Modèle</label>
@@ -639,11 +639,13 @@ let savedMinutes=0;
 const BARS=40;
 
 // ── SPEECH RECOGNITION ──
+let mediaRecorder=null, audioChunks=[];
+
 function buildRecognition(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR) return null;
   const r=new SR();
-  const langMap={'fr':'fr-FR','tn':'fr-FR','ar':'ar-TN','en':'en-US'};
+  const langMap={'fr':'fr-FR','ar':'ar-SA','en':'en-US'};
   r.lang=langMap[document.getElementById('f-lang')?.value||'fr']||'fr-FR';
   r.continuous=true;r.interimResults=true;r.maxAlternatives=1;
   r.onresult=e=>{
@@ -664,41 +666,80 @@ function buildRecognition(){
 function toggleRec(){if(!isRec) startRec(); else stopRec();}
 
 function startRec(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){toast('Utilisez Chrome ou Edge');return;}
+  const lang=document.getElementById('f-lang')?.value||'fr';
   transcript='';
   document.getElementById('transcript-text').textContent='';
   document.getElementById('transcript-wrap').classList.remove('show');
   document.getElementById('gen-btn').disabled=true;
-  recog=buildRecognition();
-  if(!recog) return;
-  recog.start();
-  isRec=true;seconds=0;
-  setRecState('recording');
-  document.getElementById('rec-timer').style.display='block';
-  document.getElementById('mode-label').textContent='Micro actif ✓';
-  timerInt=setInterval(()=>{
-    seconds++;
-    document.getElementById('rec-timer').textContent=
-      String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
-  },1000);
-  waveInt=setInterval(()=>{
-    for(let i=0;i<BARS;i++){const b=document.getElementById('wb'+i);if(b){b.style.height=(Math.random()*26+4)+'px';b.classList.add('active');}}
-  },90);
+
+  if(lang==='tn'){
+    // Mode Whisper — MediaRecorder
+    navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+      audioChunks=[];
+      mediaRecorder=new MediaRecorder(stream,{mimeType:'audio/webm'});
+      mediaRecorder.ondataavailable=e=>{if(e.data.size>0) audioChunks.push(e.data);};
+      mediaRecorder.start(1000);
+      isRec=true;seconds=0;
+      setRecState('recording');
+      document.getElementById('rec-timer').style.display='block';
+      document.getElementById('mode-label').textContent='Whisper actif ✓';
+      document.getElementById('transcript-wrap').classList.add('show');
+      document.getElementById('transcript-text').textContent='Enregistrement en cours — parlez en français/arabe...';
+      timerInt=setInterval(()=>{seconds++;document.getElementById('rec-timer').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');},1000);
+      waveInt=setInterval(()=>{for(let i=0;i<BARS;i++){const b=document.getElementById('wb'+i);if(b){b.style.height=(Math.random()*26+4)+'px';b.classList.add('active');}}},90);
+    }).catch(()=>toast('Microphone refusé'));
+  } else {
+    // Mode Chrome Speech
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){toast('Utilisez Chrome ou Edge');return;}
+    recog=buildRecognition();
+    if(!recog) return;
+    recog.start();
+    isRec=true;seconds=0;
+    setRecState('recording');
+    document.getElementById('rec-timer').style.display='block';
+    document.getElementById('mode-label').textContent='Micro actif ✓';
+    timerInt=setInterval(()=>{seconds++;document.getElementById('rec-timer').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');},1000);
+    waveInt=setInterval(()=>{for(let i=0;i<BARS;i++){const b=document.getElementById('wb'+i);if(b){b.style.height=(Math.random()*26+4)+'px';b.classList.add('active');}}},90);
+  }
 }
 
-function stopRec(){
+async function stopRec(){
+  const lang=document.getElementById('f-lang')?.value||'fr';
   isRec=false;
-  if(recog) try{recog.stop()}catch{}
   clearInterval(timerInt);clearInterval(waveInt);
   for(let i=0;i<BARS;i++){const b=document.getElementById('wb'+i);if(b){b.style.height='6px';b.classList.remove('active');}}
   document.getElementById('rec-timer').style.display='none';
-  const final=(transcript||document.getElementById('transcript-text').textContent).trim();
-  if(!final){toast('Aucune parole détectée');setRecState('idle');document.getElementById('mode-label').textContent='Prêt';return;}
-  transcript=final;
-  setRecState('done');
-  document.getElementById('mode-label').textContent='Transcription ✓';
-  document.getElementById('gen-btn').disabled=false;
+
+  if(lang==='tn' && mediaRecorder){
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t=>t.stop());
+    setRecState('done');
+    document.getElementById('mode-label').textContent='Transcription Whisper...';
+    document.getElementById('transcript-text').textContent='⏳ Envoi à Whisper...';
+    await new Promise(r=>setTimeout(r,800));
+    const blob=new Blob(audioChunks,{type:'audio/webm'});
+    try{
+      const res=await fetch('/api/transcribe',{method:'POST',headers:{'Content-Type':'audio/webm'},body:blob});
+      const data=await res.json();
+      if(data.text&&data.text.trim()){
+        transcript=data.text.trim();
+        document.getElementById('transcript-text').textContent=transcript;
+        document.getElementById('mode-label').textContent='Whisper ✓';
+        document.getElementById('gen-btn').disabled=false;
+      } else {
+        toast('Aucune parole détectée');setRecState('idle');document.getElementById('mode-label').textContent='Prêt';
+      }
+    }catch(e){toast('Erreur Whisper');setRecState('idle');}
+  } else {
+    if(recog) try{recog.stop()}catch{}
+    const final=(transcript||document.getElementById('transcript-text').textContent).trim();
+    if(!final){toast('Aucune parole détectée');setRecState('idle');document.getElementById('mode-label').textContent='Prêt';return;}
+    transcript=final;
+    setRecState('done');
+    document.getElementById('mode-label').textContent='Transcription ✓';
+    document.getElementById('gen-btn').disabled=false;
+  }
 }
 
 function setRecState(s){
