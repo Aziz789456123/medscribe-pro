@@ -19,8 +19,10 @@ export default async function handler(req, res) {
       notMentioned: "Non mentionné"
     },
     tn: {
-      system: "Tu es un médecin assistant expert. La dictée est en français mélangé avec de l'arabe tunisien dialectal. Tu rédiges le compte-rendu final en français médical standard.",
-      instruction: "La dictée contient du français et de l'arabe tunisien mélangés. Rédige le compte-rendu UNIQUEMENT en français médical professionnel, en traduisant et structurant tous les éléments mentionnés.",
+      system: "Tu es un médecin assistant expert spécialisé dans les consultations médicales en Tunisie. Tu comprends parfaitement le mélange de français médical et d'arabe tunisien dialectal (darija). Tu rédiges des comptes-rendus médicaux professionnels en français standard.",
+      instruction: `La dictée contient du français et de l'arabe tunisien dialectal mélangés (darija). 
+Vocabulaire tunisien courant: lyoum/elyoum=aujourd'hui, barcha=beaucoup, chwaya=un peu, mrigel=bien/debout, maridh=malade, yوجع/wجع=douleur, rass=tête, kalb=cœur, kerch=ventre, dhar=dos, skhana=fièvre, demm=sang, berd=rhume, mafish=il n'y a pas, aandou=il a, maandoush=il n'a pas.
+Traduis et structure TOUT le contenu en français médical professionnel. Ne laisse aucun mot en arabe dans le compte-rendu final.`,
       notMentioned: "Non mentionné"
     },
     ar: {

@@ -26,11 +26,16 @@ export default async function handler(req, res) {
     const boundary = '----WebKitFormBoundary' + Math.random().toString(36).slice(2);
     const contentType = req.headers['content-type'] || 'audio/webm';
     
+    const whisperPrompt = `Transcription d'une consultation médicale en Tunisie. Le médecin parle en mélange de français médical et d'arabe tunisien dialectal (darija).
+Mots tunisiens fréquents: lyoum/elyoum=aujourd'hui, barcha=beaucoup, chwaya=un peu, barka=assez, mrigel=bien/debout, maridh=malade, wجع/yوجع=douleur/faire mal, rass=tête, kalb=cœur, kerch=ventre, dhar=dos, riha=odeur/respiration, berd=froid/rhume, skhana=fièvre, demm=sang, echnou/chnia=quoi, kifeh=comment, win=où, fahemt=compris, yezzi=suffisant, ama=mais, tawa=maintenant, elli=qui/que, fama=il y a, mafish=il n'y a pas, aandou=il a, maandoush=il n'a pas, 3and=chez/avoir.
+Termes médicaux courants dits en français: tension, glycémie, ordonnance, radiographie, analyse, chirurgie, urgence, prescription, antibiotique, douleur, fièvre, traitement.
+Retranscris fidèlement le mélange des deux langues tel qu'il est prononcé.`;
+
     const body = Buffer.concat([
       Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="audio.webm"\r\nContent-Type: ${contentType}\r\n\r\n`),
       buffer,
       Buffer.from(`\r\n--${boundary}\r\nContent-Disposition: form-data; name="model"\r\n\r\nwhisper-1\r\n`),
-      Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="prompt"\r\n\r\nMedical consultation in French and Tunisian Arabic mixed. Medical terms in French.\r\n`),
+      Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="prompt"\r\n\r\n${whisperPrompt}\r\n`),
       Buffer.from(`--${boundary}--\r\n`)
     ]);
 
