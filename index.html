@@ -281,7 +281,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
     </p>
     <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:1.25rem;margin-bottom:1.5rem">
       <p style="font-size:13px;color:var(--text3);margin-bottom:6px">Abonnement mensuel</p>
-      <p style="font-size:32px;font-weight:700;color:var(--blue);font-family:'Instrument Serif',serif">50 DT<span style="font-size:14px;color:var(--text3);font-family:'Syne',sans-serif">/mois</span></p>
+      <p style="font-size:32px;font-weight:700;color:var(--blue);font-family:'Instrument Serif',serif">49 €<span style="font-size:14px;color:var(--text3);font-family:'Syne',sans-serif">/mois</span></p>
     </div>
     <a href="mailto:contact@medscribe.zaanoun.dev" class="auth-btn" style="display:block;text-decoration:none;line-height:48px">
       Contacter pour s'abonner
@@ -387,7 +387,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
           <div class="field-grid">
             <div class="field">
               <label>Langue</label>
-              <select id="f-lang"><option value="fr">🇫🇷 Français</option><option value="tn">🇹🇳 Tunisien (Whisper IA)</option><option value="ar">🇸🇦 Arabe</option><option value="en">🇬🇧 Anglais</option></select>
+              <select id="f-lang"><option value="fr">🇫🇷 Français</option><option value="en">🇬🇧 Anglais</option></select>
             </div>
             <div class="field">
               <label>Modèle</label>
@@ -478,7 +478,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
       <div class="settings-section">
         <div class="settings-title">Préférences</div>
         <div class="settings-grid">
-          <div class="field"><label>Langue par défaut</label><select id="pref-lang"><option value="fr">🇫🇷 Français</option><option value="ar">🇹🇳 Arabe</option><option value="en">🇬🇧 Anglais</option></select></div>
+          <div class="field"><label>Langue par défaut</label><select id="pref-lang"><option value="fr">🇫🇷 Français</option><option value="en">🇬🇧 Anglais</option></select></div>
           <div class="field"><label>Modèle par défaut</label><select id="pref-template"><option value="standard">Standard</option><option value="cardio">Cardiologie</option><option value="dermato">Dermatologie</option><option value="pediatrie">Pédiatrie</option><option value="urgences">Urgences</option></select></div>
         </div>
         <button class="btn-save" onclick="savePreferences()">Sauvegarder</button>
@@ -672,36 +672,22 @@ function startRec(){
   document.getElementById('transcript-wrap').classList.remove('show');
   document.getElementById('gen-btn').disabled=true;
 
-  if(lang==='tn'){
-    // Mode Whisper — MediaRecorder
-    navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
-      audioChunks=[];
-      mediaRecorder=new MediaRecorder(stream,{mimeType:'audio/webm'});
-      mediaRecorder.ondataavailable=e=>{if(e.data.size>0) audioChunks.push(e.data);};
-      mediaRecorder.start(1000);
-      isRec=true;seconds=0;
-      setRecState('recording');
-      document.getElementById('rec-timer').style.display='block';
-      document.getElementById('mode-label').textContent='Whisper actif ✓';
-      document.getElementById('transcript-wrap').classList.add('show');
-      document.getElementById('transcript-text').textContent='Enregistrement en cours — parlez en français/arabe...';
-      timerInt=setInterval(()=>{seconds++;document.getElementById('rec-timer').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');},1000);
-      waveInt=setInterval(()=>{for(let i=0;i<BARS;i++){const b=document.getElementById('wb'+i);if(b){b.style.height=(Math.random()*26+4)+'px';b.classList.add('active');}}},90);
-    }).catch(()=>toast('Microphone refusé'));
-  } else {
-    // Mode Chrome Speech
-    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    if(!SR){toast('Utilisez Chrome ou Edge');return;}
-    recog=buildRecognition();
-    if(!recog) return;
-    recog.start();
+  // Whisper pour FR et EN
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    audioChunks=[];
+    const mimeType=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
+    mediaRecorder=new MediaRecorder(stream,{mimeType});
+    mediaRecorder.ondataavailable=e=>{if(e.data.size>0) audioChunks.push(e.data);};
+    mediaRecorder.start(1000);
     isRec=true;seconds=0;
     setRecState('recording');
     document.getElementById('rec-timer').style.display='block';
     document.getElementById('mode-label').textContent='Micro actif ✓';
+    document.getElementById('transcript-wrap').classList.add('show');
+    document.getElementById('transcript-text').textContent='Enregistrement en cours...';
     timerInt=setInterval(()=>{seconds++;document.getElementById('rec-timer').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');},1000);
     waveInt=setInterval(()=>{for(let i=0;i<BARS;i++){const b=document.getElementById('wb'+i);if(b){b.style.height=(Math.random()*26+4)+'px';b.classList.add('active');}}},90);
-  }
+  }).catch(()=>toast('Microphone refusé — vérifiez les permissions'));
 }
 
 async function stopRec(){
@@ -711,34 +697,36 @@ async function stopRec(){
   for(let i=0;i<BARS;i++){const b=document.getElementById('wb'+i);if(b){b.style.height='6px';b.classList.remove('active');}}
   document.getElementById('rec-timer').style.display='none';
 
-  if(lang==='tn' && mediaRecorder){
-    mediaRecorder.stop();
-    mediaRecorder.stream.getTracks().forEach(t=>t.stop());
-    setRecState('done');
-    document.getElementById('mode-label').textContent='Transcription Whisper...';
-    document.getElementById('transcript-text').textContent='⏳ Envoi à Whisper...';
-    await new Promise(r=>setTimeout(r,800));
-    const blob=new Blob(audioChunks,{type:'audio/webm'});
-    try{
-      const res=await fetch('/api/transcribe',{method:'POST',headers:{'Content-Type':'audio/webm'},body:blob});
-      const data=await res.json();
-      if(data.text&&data.text.trim()){
-        transcript=data.text.trim();
-        document.getElementById('transcript-text').textContent=transcript;
-        document.getElementById('mode-label').textContent='Whisper ✓';
-        document.getElementById('gen-btn').disabled=false;
-      } else {
-        toast('Aucune parole détectée');setRecState('idle');document.getElementById('mode-label').textContent='Prêt';
-      }
-    }catch(e){toast('Erreur Whisper');setRecState('idle');}
-  } else {
-    if(recog) try{recog.stop()}catch{}
-    const final=(transcript||document.getElementById('transcript-text').textContent).trim();
-    if(!final){toast('Aucune parole détectée');setRecState('idle');document.getElementById('mode-label').textContent='Prêt';return;}
-    transcript=final;
-    setRecState('done');
-    document.getElementById('mode-label').textContent='Transcription ✓';
-    document.getElementById('gen-btn').disabled=false;
+  if(!mediaRecorder){toast('Erreur microphone');return;}
+  mediaRecorder.stop();
+  mediaRecorder.stream.getTracks().forEach(t=>t.stop());
+  setRecState('done');
+  document.getElementById('mode-label').textContent='Transcription en cours...';
+  document.getElementById('transcript-text').textContent='⏳ Transcription Whisper...';
+
+  await new Promise(r=>setTimeout(r,800));
+  const blob=new Blob(audioChunks,{type:'audio/webm'});
+  try{
+    const res=await fetch('/api/transcribe',{
+      method:'POST',
+      headers:{'Content-Type':'audio/webm','x-language':lang},
+      body:blob
+    });
+    const data=await res.json();
+    if(data.text&&data.text.trim()){
+      transcript=data.text.trim();
+      document.getElementById('transcript-text').textContent=transcript;
+      document.getElementById('mode-label').textContent='Transcription ✓';
+      document.getElementById('gen-btn').disabled=false;
+    } else {
+      toast('Aucune parole détectée');
+      setRecState('idle');
+      document.getElementById('mode-label').textContent='Prêt';
+    }
+  }catch(e){
+    toast('Erreur de transcription — réessayez');
+    setRecState('idle');
+    document.getElementById('mode-label').textContent='Prêt';
   }
 }
 
