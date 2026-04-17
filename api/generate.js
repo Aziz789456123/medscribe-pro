@@ -18,6 +18,11 @@ export default async function handler(req, res) {
       instruction: "Rédige le compte-rendu en français avec la terminologie médicale française standard.",
       notMentioned: "Non mentionné"
     },
+    tn: {
+      system: "Tu es un médecin assistant expert. La dictée est en français mélangé avec de l'arabe tunisien dialectal. Tu rédiges le compte-rendu final en français médical standard.",
+      instruction: "La dictée contient du français et de l'arabe tunisien mélangés. Rédige le compte-rendu UNIQUEMENT en français médical professionnel, en traduisant et structurant tous les éléments mentionnés.",
+      notMentioned: "Non mentionné"
+    },
     ar: {
       system: "أنت مساعد طبيب خبير. تكتب التقارير الطبية باللغة العربية.",
       instruction: "اكتب التقرير الطبي باللغة العربية مع استخدام المصطلحات الطبية الصحيحة.",
