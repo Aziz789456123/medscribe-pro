@@ -569,8 +569,10 @@ async function showApp(user){
   if(profile){
     const now = new Date();
     const trialEnd = new Date(profile.trial_end);
-    const expired = now > trialEnd;
-    if(expired && !profile.is_active){
+    const trialExpired = now > trialEnd;
+    // Block if: trial expired AND not active, OR manually deactivated
+    if(!profile.is_active || trialExpired){
+      await sb.auth.signOut();
       showBlocked();
       return;
     }
@@ -605,8 +607,8 @@ function showBlocked(){
 }
 
 // Check session on load
-sb.auth.getSession().then(({data:{session}})=>{
-  if(session) showApp(session.user);
+sb.auth.getSession().then(async ({data:{session}})=>{
+  if(session) await showApp(session.user);
 });
 
 // ── NAVIGATION ──
