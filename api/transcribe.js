@@ -11,30 +11,23 @@ export default async function handler(req, res) {
   if (!OPENAI_KEY) return res.status(500).json({ error: 'OpenAI key not configured' });
 
   try {
-    // Read raw body as buffer
     const chunks = [];
     for await (const chunk of req) chunks.push(chunk);
     const buffer = Buffer.concat(chunks);
 
-    // Forward to OpenAI Whisper as multipart
-    const { FormData, Blob } = await import('node:buffer').catch(() => ({}));
-    
-    // Use native fetch with FormData
-    const formData = new (await import('formdata-node').then(m => m.FormData).catch(() => null) || globalThis.FormData)();
-    
-    // Build multipart manually
-    const boundary = '----WebKitFormBoundary' + Math.random().toString(36).slice(2);
+    const lang = req.headers['x-language'] || 'fr';
+    const boundary = '----MedScribeBoundary' + Math.random().toString(36).slice(2);
     const contentType = req.headers['content-type'] || 'audio/webm';
-    
-    const whisperPrompt = `Transcription d'une consultation médicale en Tunisie. Le médecin parle en mélange de français médical et d'arabe tunisien dialectal (darija).
-Mots tunisiens fréquents: lyoum/elyoum=aujourd'hui, barcha=beaucoup, chwaya=un peu, barka=assez, mrigel=bien/debout, maridh=malade, wجع/yوجع=douleur/faire mal, rass=tête, kalb=cœur, kerch=ventre, dhar=dos, riha=odeur/respiration, berd=froid/rhume, skhana=fièvre, demm=sang, echnou/chnia=quoi, kifeh=comment, win=où, fahemt=compris, yezzi=suffisant, ama=mais, tawa=maintenant, elli=qui/que, fama=il y a, mafish=il n'y a pas, aandou=il a, maandoush=il n'a pas, 3and=chez/avoir.
-Termes médicaux courants dits en français: tension, glycémie, ordonnance, radiographie, analyse, chirurgie, urgence, prescription, antibiotique, douleur, fièvre, traitement.
-Retranscris fidèlement le mélange des deux langues tel qu'il est prononcé.`;
+
+    const whisperPrompt = lang === 'en'
+      ? 'Medical consultation in English. Doctor and patient discussing symptoms, diagnosis and treatment.'
+      : 'Consultation médicale en français. Médecin et patient discutent des symptômes, du diagnostic et du traitement. Terminologie médicale française.';
 
     const body = Buffer.concat([
       Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="audio.webm"\r\nContent-Type: ${contentType}\r\n\r\n`),
       buffer,
       Buffer.from(`\r\n--${boundary}\r\nContent-Disposition: form-data; name="model"\r\n\r\nwhisper-1\r\n`),
+      Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="language"\r\n\r\n${lang === 'en' ? 'en' : 'fr'}\r\n`),
       Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="prompt"\r\n\r\n${whisperPrompt}\r\n`),
       Buffer.from(`--${boundary}--\r\n`)
     ]);

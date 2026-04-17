@@ -11,37 +11,15 @@ export default async function handler(req, res) {
   const GROQ_KEY = process.env.GROQ_API_KEY;
   if (!GROQ_KEY) return res.status(500).json({ error: 'API key not configured' });
 
-  // Language-specific instructions
   const langInstructions = {
     fr: {
-      system: "Tu es un médecin assistant expert francophone. Tu rédiges des comptes-rendus médicaux professionnels en français.",
-      instruction: "Rédige le compte-rendu en français avec la terminologie médicale française standard.",
+      system: "Tu es un médecin assistant expert francophone. Tu rédiges des comptes-rendus médicaux professionnels en français avec une terminologie médicale précise et structurée.",
+      instruction: "Rédige le compte-rendu en français médical standard. Utilise la terminologie médicale française officielle. Sois précis, concis et professionnel.",
       notMentioned: "Non mentionné"
-    },
-    tn: {
-      system: "Tu es un médecin assistant expert spécialisé dans les consultations médicales en Tunisie. Tu maîtrises parfaitement le darija tunisien médical et tu rédiges des comptes-rendus en français médical standard.",
-      instruction: `La dictée est en darija tunisien et/ou français mélangés. Traduis et structure tout en français médical professionnel.
-
-DICTIONNAIRE DARIJA MÉDICAL:
-Corps: rass=tête, odhon=oreille, 3ain=œil, anf=nez, ferr=bouche, 3onba=cou, ktef=épaule, dra3=bras, id=main, kalb=cœur, s'dr=poitrine, ri7a=poumon, kerch=abdomen, klawi=reins, dhar=dos, rkoba=genou, rejel=jambe, 3adem=os, dam=sang, jeld=peau.
-Symptômes: yewja3ni/waja3=douleur, s'khana/7arariya=fièvre, berd=rhume, ko77a=toux, tkayyef=vomissement, 7arsha=démangeaison, dawkha=vertige, 3ayet/ta3ben=fatigue, ishal=diarrhée, 7bess=constipation, wrem=œdème, 7rajja=brûlure, r3asha=tremblement, 3araq=transpiration, ma yen3emshi=difficulté à marcher.
-Temps: lyoum/elyoum=aujourd'hui, ems=hier, tawa=maintenant, barsha wa9t=depuis longtemps, kol yoem=chaque jour, sbé7=matin, 3chia=soir, el lila=cette nuit.
-Quantité: barcha=beaucoup, chwaya=un peu, da7wa=toujours, ma7yejna=jamais.
-Antécédents: sokar=diabète, darr d'dam=hypertension, 9alb=cardiopathie, 7ساسية=allergie, 3amalt 3maliya=antécédent chirurgical.
-Médicaments: dwa=médicament, 7boba=comprimé, shar6=sirop, 7o9na=injection, marham=pommade, 9a6ra=gouttes.
-Général: mrigel=en bonne forme, maridh=malade, fama=il y a, mafish=absent, 3andou=il/elle a, maandoush=n'a pas.
-
-Traduis TOUT en français médical. Ne laisse aucun mot en arabe dans le compte-rendu final.`,
-      notMentioned: "Non mentionné"
-    },
-    ar: {
-      system: "أنت مساعد طبيب خبير. تكتب التقارير الطبية باللغة العربية.",
-      instruction: "اكتب التقرير الطبي باللغة العربية مع استخدام المصطلحات الطبية الصحيحة.",
-      notMentioned: "غير مذكور"
     },
     en: {
-      system: "You are an expert medical assistant. You write professional medical reports in English.",
-      instruction: "Write the medical report in English using standard medical terminology.",
+      system: "You are an expert medical assistant. You write professional medical reports in English using standard medical terminology.",
+      instruction: "Write the medical report in English using standard medical terminology. Be precise, concise and professional.",
       notMentioned: "Not mentioned"
     }
   };
@@ -49,46 +27,25 @@ Traduis TOUT en français médical. Ne laisse aucun mot en arabe dans le compte-
   const l = langInstructions[lang] || langInstructions.fr;
   const nm = l.notMentioned;
 
-  // Template-specific additions
   const templateExtra = {
-    cardio: lang === 'ar'
-      ? 'للقلب: اذكر معدل ضربات القلب، ضغط الدم، تسمع القلب، علامات فشل القلب.'
-      : lang === 'en'
-      ? 'For cardiology: include heart rate, blood pressure, cardiac auscultation, signs of heart failure.'
-      : 'Pour la cardiologie : inclure fréquence cardiaque, tension artérielle, auscultation cardiaque, signes d\'insuffisance cardiaque.',
-    dermato: lang === 'ar'
-      ? 'للجلدية: وصف الآفات (نوع، حجم، لون، موقع، تطور).'
-      : lang === 'en'
-      ? 'For dermatology: describe lesions (type, size, color, location, progression).'
-      : 'Pour la dermatologie : décrire les lésions (type, taille, couleur, localisation, évolution).',
-    pediatrie: lang === 'ar'
-      ? 'لطب الأطفال: اذكر الوزن، الطول، محيط الرأس، التطور الحركي، التطعيمات.'
-      : lang === 'en'
-      ? 'For pediatrics: include weight, height, head circumference, motor development, vaccinations.'
-      : 'Pour la pédiatrie : inclure poids, taille, périmètre crânien, développement, vaccinations.',
-    urgences: lang === 'ar'
-      ? 'للطوارئ: اذكر درجة الفرز، العلامات الحيوية الكاملة، القرار (دخول/خروج).'
-      : lang === 'en'
-      ? 'For emergencies: include triage score, full vital signs, decision (admission/discharge).'
-      : 'Pour les urgences : inclure score de triage, constantes vitales complètes, décision (hospitalisation/sortie).',
+    cardio: lang === 'en'
+      ? 'For cardiology: include heart rate, blood pressure, cardiac auscultation, signs of heart failure, ECG results if mentioned.'
+      : 'Pour la cardiologie : inclure fréquence cardiaque, tension artérielle, auscultation cardiaque, signes d\'insuffisance cardiaque, résultats ECG si mentionnés.',
+    dermato: lang === 'en'
+      ? 'For dermatology: describe lesions in detail (type, size, color, location, borders, progression).'
+      : 'Pour la dermatologie : décrire les lésions en détail (type, taille, couleur, localisation, contours, évolution).',
+    pediatrie: lang === 'en'
+      ? 'For pediatrics: include weight, height, head circumference, developmental milestones, vaccination status.'
+      : 'Pour la pédiatrie : inclure poids, taille, périmètre crânien, développement psychomoteur, statut vaccinal.',
+    urgences: lang === 'en'
+      ? 'For emergencies: include triage score, complete vital signs, Glasgow score if relevant, decision (admission/discharge).'
+      : 'Pour les urgences : inclure score de triage, constantes vitales complètes, score de Glasgow si pertinent, décision (hospitalisation/sortie).',
     standard: ''
   };
 
   const extra = templateExtra[template] || '';
 
-  const prompt = lang === 'ar'
-    ? `${l.system}
-
-${l.instruction} ${extra}
-
-إملاء الطبيب: "${transcript}"
-المريض: ${name || '؟'}, ${age || '؟'} سنة, ${sex || '؟'}, ${type || 'طب عام'}
-
-اكتب JSON فقط بهذه المفاتيح الستة بدون أي نص آخر:
-{"motif":"...","anamnese":"...","examen":"...","conclusion":"...","traitement":"...","suivi":"..."}
-
-إذا لم يُذكر شيء، اكتب "${nm}" في ذلك الحقل.`
-    : lang === 'en'
+  const prompt = lang === 'en'
     ? `${l.system}
 
 ${l.instruction} ${extra}
