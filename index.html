@@ -531,7 +531,13 @@ async function signup(){
   if(data.user){
     const trialEnd = new Date();
     trialEnd.setDate(trialEnd.getDate()+7);
-    await sb.from('profiles').insert({user_id:data.user.id, is_active:true, trial_end:trialEnd.toISOString()});
+    await sb.from('profiles').insert({
+      user_id: data.user.id,
+      is_active: true,
+      trial_end: trialEnd.toISOString(),
+      email: email,
+      full_name: name
+    });
   }
   suc.textContent='Compte créé ! Vérifiez votre email pour confirmer.';suc.classList.add('show');
   btn.disabled=false;btn.textContent='Créer mon compte';
