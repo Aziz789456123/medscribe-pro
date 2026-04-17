@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="audio.webm"\r\nContent-Type: ${contentType}\r\n\r\n`),
       buffer,
       Buffer.from(`\r\n--${boundary}\r\nContent-Disposition: form-data; name="model"\r\n\r\nwhisper-1\r\n`),
-      Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="language"\r\n\r\nfr\r\n`),
+      Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="prompt"\r\n\r\nMedical consultation in French and Tunisian Arabic mixed. Medical terms in French.\r\n`),
       Buffer.from(`--${boundary}--\r\n`)
     ]);
 
