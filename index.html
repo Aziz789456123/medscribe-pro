@@ -262,6 +262,37 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
   </div>
 </div>
 
+<!-- ══ PAGE BLOQUÉ ══ -->
+<div class="auth-page" id="auth-blocked">
+  <div class="auth-card" style="text-align:center">
+    <div class="auth-logo" style="justify-content:center">
+      <div class="auth-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
+          <path d="M2 4h14M2 8h9M2 12h11" stroke="white" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="auth-logo-name">MedScribe<sup>PRO</sup></span>
+    </div>
+    <div style="font-size:48px;margin-bottom:1rem">⏰</div>
+    <h1 class="auth-title" style="margin-bottom:8px">Essai terminé</h1>
+    <p style="font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:2rem">
+      Votre période d'essai gratuit de 7 jours est terminée.<br>
+      Pour continuer à utiliser MedScribe Pro, contactez-nous.
+    </p>
+    <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:1.25rem;margin-bottom:1.5rem">
+      <p style="font-size:13px;color:var(--text3);margin-bottom:6px">Abonnement mensuel</p>
+      <p style="font-size:32px;font-weight:700;color:var(--blue);font-family:'Instrument Serif',serif">49 €<span style="font-size:14px;color:var(--text3);font-family:'Syne',sans-serif">/mois</span></p>
+    </div>
+    <a href="mailto:contact@medscribe.zaanoun.dev" class="auth-btn" style="display:block;text-decoration:none;line-height:48px">
+      Contacter pour s'abonner
+    </a>
+    <p style="margin-top:1rem;font-size:12px;color:var(--text3)">
+      Ou appelez le <strong style="color:var(--text2)">+216 23 491 222</strong>
+    </p>
+    <p class="auth-switch"><a onclick="logout()">Se déconnecter</a></p>
+  </div>
+</div>
+
 <!-- ══ APP ══ -->
 <aside class="sidebar" id="sidebar" style="display:none">
   <div class="sidebar-logo">
@@ -496,6 +527,12 @@ async function signup(){
   btn.disabled=true;btn.textContent='Création…';
   const {data,error} = await sb.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
   if(error){err.textContent=error.message;err.classList.add('show');btn.disabled=false;btn.textContent='Créer mon compte';return;}
+  // Create profile with 7-day trial
+  if(data.user){
+    const trialEnd = new Date();
+    trialEnd.setDate(trialEnd.getDate()+7);
+    await sb.from('profiles').insert({user_id:data.user.id, is_active:true, trial_end:trialEnd.toISOString()});
+  }
   suc.textContent='Compte créé ! Vérifiez votre email pour confirmer.';suc.classList.add('show');
   btn.disabled=false;btn.textContent='Créer mon compte';
 }
@@ -516,9 +553,23 @@ function showSignup(){
   document.getElementById('auth-signup').classList.add('active');
 }
 
-function showApp(user){
+async function showApp(user){
   document.getElementById('auth-login').classList.remove('active');
   document.getElementById('auth-signup').classList.remove('active');
+
+  // Check trial / access
+  const {data:profile} = await sb.from('profiles').select('*').eq('user_id',user.id).single();
+
+  if(profile){
+    const now = new Date();
+    const trialEnd = new Date(profile.trial_end);
+    const expired = now > trialEnd;
+    if(expired && !profile.is_active){
+      showBlocked();
+      return;
+    }
+  }
+
   document.getElementById('sidebar').style.display='flex';
   document.getElementById('main-app').classList.add('active');
   const name = user.user_metadata?.full_name || user.email.split('@')[0];
@@ -527,9 +578,24 @@ function showApp(user){
   document.getElementById('sidebar-user-email').textContent = email;
   document.getElementById('settings-email').textContent = email;
   document.getElementById('avatar-initials').textContent = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+
+  // Show days remaining if in trial
+  if(profile){
+    const now = new Date();
+    const trialEnd = new Date(profile.trial_end);
+    const daysLeft = Math.ceil((trialEnd-now)/(1000*60*60*24));
+    if(daysLeft>0 && daysLeft<=7){
+      toast(`Essai gratuit : ${daysLeft} jour(s) restant(s)`);
+    }
+  }
+
   loadDoctorProfile();
   loadPreferences();
   initApp();
+}
+
+function showBlocked(){
+  document.getElementById('auth-blocked').classList.add('active');
 }
 
 // Check session on load
