@@ -8,10 +8,24 @@ export default async function handler(req, res) {
   const STRIPE_KEY = process.env.STRIPE_SECRET_KEY;
   if (!STRIPE_KEY) return res.status(500).json({ error: 'Stripe key not configured' });
 
-  const { email, userId } = req.body;
-  if (!email || !userId) return res.status(400).json({ error: 'Missing email or userId' });
-
   try {
+    // Parse body manually for Vercel
+    let body = req.body;
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch(e) {}
+    }
+    if (!body) {
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      const raw = Buffer.concat(chunks).toString();
+      try { body = JSON.parse(raw); } catch(e) { body = {}; }
+    }
+
+    const { email, userId } = body;
+    if (!email || !userId) {
+      return res.status(400).json({ error: `Missing fields: email=${email}, userId=${userId}` });
+    }
+
     const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
@@ -27,7 +41,6 @@ export default async function handler(req, res) {
         'success_url': 'https://medscribe.zaanoun.dev?payment=success',
         'cancel_url': 'https://medscribe.zaanoun.dev?payment=cancelled',
         'metadata[user_id]': userId,
-        'subscription_data[trial_period_days]': '0',
         'allow_promotion_codes': 'true'
       })
     });
