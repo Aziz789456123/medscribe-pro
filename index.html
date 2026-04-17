@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedScribe Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -17,6 +18,30 @@
   --amber:#f59e0b;--r:8px;--r2:12px;
 }
 body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── AUTH PAGES ── */
+.auth-page{display:none;min-height:100vh;align-items:center;justify-content:center;padding:2rem}
+.auth-page.active{display:flex}
+.auth-card{width:100%;max-width:420px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:2.5rem;box-shadow:0 24px 64px rgba(0,0,0,0.4)}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem;justify-content:center}
+.auth-logo-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center}
+.auth-logo-name{font-size:20px;font-weight:700;letter-spacing:-0.3px}
+.auth-logo-name sup{font-size:9px;font-weight:600;background:var(--blue);color:white;padding:1px 5px;border-radius:4px;vertical-align:super;margin-left:2px}
+.auth-title{font-family:'Instrument Serif',serif;font-size:26px;text-align:center;margin-bottom:4px}
+.auth-sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:2rem}
+.auth-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.auth-field label{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
+.auth-field input{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:0 14px;height:44px;font-family:'Syne',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color 0.15s}
+.auth-field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-glow)}
+.auth-btn{width:100%;height:48px;background:var(--blue);color:white;border:none;border-radius:var(--r);font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;transition:background 0.15s}
+.auth-btn:hover{background:#2563eb}
+.auth-btn:disabled{opacity:0.5;cursor:not-allowed}
+.auth-switch{text-align:center;margin-top:1.25rem;font-size:13px;color:var(--text3)}
+.auth-switch a{color:var(--blue);cursor:pointer;text-decoration:none}
+.auth-error{background:var(--red-glow);border:1px solid rgba(244,63,94,0.3);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:14px;display:none}
+.auth-error.show{display:block}
+.auth-success{background:var(--green-glow);border:1px solid rgba(16,185,129,0.3);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--green);margin-bottom:14px;display:none}
+.auth-success.show{display:block}
 
 /* ── SIDEBAR ── */
 .sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:50}
@@ -31,16 +56,17 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 .nav-item:hover{background:var(--bg3);color:var(--text)}
 .nav-item.active{background:var(--blue-glow);color:var(--blue);border-color:rgba(59,130,246,0.2)}
 .nav-item svg{width:15px;height:15px;flex-shrink:0}
-.nav-badge{margin-left:auto;font-size:10px;font-weight:600;background:var(--blue);color:white;padding:1px 7px;border-radius:10px}
 .sidebar-bottom{padding:1rem 0.75rem;border-top:1px solid var(--border)}
 .user-card{display:flex;align-items:center;gap:10px;padding:0.6rem 0.75rem;border-radius:var(--r);background:var(--bg3)}
 .user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0}
 .user-info{flex:1;min-width:0}
 .user-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .user-role{font-size:10px;color:var(--text3)}
+.logout-btn{width:8px;height:8px;cursor:pointer;color:var(--text3);flex-shrink:0;font-size:16px}
 
 /* ── MAIN ── */
-.main{margin-left:220px;min-height:100vh;display:flex;flex-direction:column}
+.main{margin-left:220px;min-height:100vh;display:flex;flex-direction:column;display:none}
+.main.active{display:flex}
 .topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 2rem;gap:1rem;background:rgba(10,12,15,0.8);backdrop-filter:blur(12px);position:sticky;top:0;z-index:40}
 .topbar-title{font-family:'Instrument Serif',serif;font-size:20px;letter-spacing:-0.3px}
 .topbar-date{font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace}
@@ -82,7 +108,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 /* ── RECORDER ── */
 .recorder{border:1px solid var(--border2);border-radius:var(--r2);background:var(--bg3);overflow:hidden}
 .recorder-top{padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem}
-.rec-circle{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:transform 0.15s;flex-shrink:0}
+.rec-circle{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.15s;flex-shrink:0}
 .rec-circle:hover{transform:scale(1.06)}
 .rec-circle:active{transform:scale(0.95)}
 .rec-circle.idle{background:var(--bg4);border:2px solid var(--border2)}
@@ -104,7 +130,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 .transcript-text{font-size:13px;color:var(--text2);line-height:1.7;font-style:italic;font-family:'Instrument Serif',serif}
 
 /* ── GENERATE BTN ── */
-.btn-generate{width:100%;height:48px;background:var(--blue);color:white;border:none;border-radius:var(--r);font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:0.3px;transition:all 0.15s;position:relative;overflow:hidden}
+.btn-generate{width:100%;height:48px;background:var(--blue);color:white;border:none;border-radius:var(--r);font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:0.3px;transition:all 0.15s}
 .btn-generate:hover{background:#2563eb;box-shadow:0 4px 20px rgba(59,130,246,0.35)}
 .btn-generate:active{transform:scale(0.99)}
 .btn-generate:disabled{opacity:0.3;cursor:not-allowed}
@@ -149,13 +175,12 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 
 /* ── HISTORY PAGE ── */
 .history-page{flex:1;padding:2rem;overflow-y:auto}
-.history-empty{text-align:center;padding:4rem 2rem;color:var(--text3);font-size:14px}
-.history-table{width:100%;border-collapse:collapse}
-.history-table th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left}
-.history-table td{padding:12px 12px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
-.history-table tr:hover td{background:var(--bg3);cursor:pointer}
-.hist-name{font-weight:600;color:var(--text)}
-.hist-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:8px}
+.history-rows{display:flex;flex-direction:column;gap:8px}
+.history-row{display:flex;align-items:center;padding:12px 14px;border-radius:var(--r);background:var(--bg3);border:1px solid var(--border);gap:10px;cursor:pointer;transition:all 0.15s}
+.history-row:hover{border-color:var(--blue);background:var(--blue-glow)}
+.hist-name-col{flex:1;font-size:13px;font-weight:600;color:var(--text)}
+.hist-type-col{font-size:11px;color:var(--text3)}
+.hist-time-col{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)}
 
 /* ── SETTINGS PAGE ── */
 .settings-page{flex:1;padding:2rem;overflow-y:auto;max-width:700px}
@@ -168,20 +193,77 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 /* ── UTILS ── */
 .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;animation:rotate 0.6s linear infinite}
 @keyframes rotate{to{transform:rotate(360deg)}}
-.history-rows{display:flex;flex-direction:column;gap:8px}
-.history-row{display:flex;align-items:center;padding:12px 14px;border-radius:var(--r);background:var(--bg3);border:1px solid var(--border);gap:10px;cursor:pointer;transition:all 0.15s}
-.history-row:hover{border-color:var(--blue);background:var(--blue-glow)}
-.hist-name-col{flex:1;font-size:13px;font-weight:600;color:var(--text)}
-.hist-type-col{font-size:11px;color:var(--text3)}
-.hist-time-col{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)}
 .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(10px);background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:10px 20px;border-radius:30px;font-size:13px;font-weight:500;opacity:0;transition:all 0.2s;pointer-events:none;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
+<!-- ══ PAGE LOGIN ══ -->
+<div class="auth-page active" id="auth-login">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
+          <path d="M2 4h14M2 8h9M2 12h11" stroke="white" stroke-width="1.7" stroke-linecap="round"/>
+          <circle cx="14.5" cy="12" r="3" stroke="white" stroke-width="1.3"/>
+          <path d="M14.5 10.5v3M13 12h3" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="auth-logo-name">MedScribe<sup>PRO</sup></span>
+    </div>
+    <h1 class="auth-title">Connexion</h1>
+    <p class="auth-sub">Accédez à votre espace médecin</p>
+    <div class="auth-error" id="login-error"></div>
+    <div class="auth-field">
+      <label>Email professionnel</label>
+      <input type="email" id="login-email" placeholder="dr.nom@cabinet.com">
+    </div>
+    <div class="auth-field">
+      <label>Mot de passe</label>
+      <input type="password" id="login-password" placeholder="••••••••">
+    </div>
+    <button class="auth-btn" id="login-btn" onclick="login()">Se connecter</button>
+    <p class="auth-switch">Pas encore de compte ? <a onclick="showSignup()">Créer un compte</a></p>
+  </div>
+</div>
+
+<!-- ══ PAGE SIGNUP ══ -->
+<div class="auth-page" id="auth-signup">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
+          <path d="M2 4h14M2 8h9M2 12h11" stroke="white" stroke-width="1.7" stroke-linecap="round"/>
+          <circle cx="14.5" cy="12" r="3" stroke="white" stroke-width="1.3"/>
+          <path d="M14.5 10.5v3M13 12h3" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="auth-logo-name">MedScribe<sup>PRO</sup></span>
+    </div>
+    <h1 class="auth-title">Créer un compte</h1>
+    <p class="auth-sub">Essai gratuit 30 jours — sans carte bancaire</p>
+    <div class="auth-error" id="signup-error"></div>
+    <div class="auth-success" id="signup-success"></div>
+    <div class="auth-field">
+      <label>Nom complet</label>
+      <input type="text" id="signup-name" placeholder="Dr. Mohamed Zaanoun">
+    </div>
+    <div class="auth-field">
+      <label>Email professionnel</label>
+      <input type="email" id="signup-email" placeholder="dr.nom@cabinet.com">
+    </div>
+    <div class="auth-field">
+      <label>Mot de passe</label>
+      <input type="password" id="signup-password" placeholder="8 caractères minimum">
+    </div>
+    <button class="auth-btn" id="signup-btn" onclick="signup()">Créer mon compte</button>
+    <p class="auth-switch">Déjà un compte ? <a onclick="showLogin()">Se connecter</a></p>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<aside class="sidebar" id="sidebar" style="display:none">
   <div class="sidebar-logo">
     <div class="logo-row">
       <div class="logo-icon">
@@ -194,7 +276,6 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
       <span class="logo-name">MedScribe<sup>PRO</sup></span>
     </div>
   </div>
-
   <nav class="sidebar-nav">
     <div class="nav-label">Principal</div>
     <div class="nav-item active" onclick="showPage('consult')" id="nav-consult">
@@ -204,30 +285,27 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
     <div class="nav-item" onclick="showPage('history')" id="nav-history">
       <svg viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7.5 4.5v3l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
       Historique
-      <span class="nav-badge" id="nav-count">0</span>
+      <span style="margin-left:auto;font-size:10px;font-weight:600;background:var(--blue);color:white;padding:1px 7px;border-radius:10px" id="nav-count">0</span>
     </div>
     <div class="nav-label" style="margin-top:0.5rem">Compte</div>
     <div class="nav-item" onclick="showPage('settings')" id="nav-settings">
-      <svg viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M7.5 1v1.5M7.5 12.5V14M1 7.5h1.5M12.5 7.5H14M2.9 2.9l1.1 1.1M11 11l1.1 1.1M2.9 12.1l1.1-1.1M11 4l1.1-1.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M7.5 1v1.5M7.5 12.5V14M1 7.5h1.5M12.5 7.5H14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
       Paramètres
     </div>
   </nav>
-
   <div class="sidebar-bottom">
     <div class="user-card">
       <div class="user-avatar" id="avatar-initials">DR</div>
       <div class="user-info">
         <div class="user-name" id="sidebar-doc-name">Dr. Médecin</div>
-        <div class="user-role" id="sidebar-doc-spec">Médecine générale</div>
+        <div class="user-role" id="sidebar-user-email">email@cabinet.com</div>
       </div>
+      <span onclick="logout()" style="cursor:pointer;color:var(--text3);font-size:18px;flex-shrink:0" title="Déconnexion">⏻</span>
     </div>
   </div>
 </aside>
 
-<!-- MAIN -->
-<main class="main">
-
-  <!-- TOPBAR -->
+<main class="main" id="main-app">
   <div class="topbar">
     <span class="topbar-title" id="page-title">Consultation</span>
     <span class="topbar-date" id="topbar-date"></span>
@@ -236,21 +314,15 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
     <span class="status-label">IA connectée</span>
   </div>
 
-  <!-- ══ PAGE : CONSULTATION ══ -->
+  <!-- PAGE CONSULTATION -->
   <div class="page active" id="page-consult">
     <div class="consult-layout">
-
-      <!-- LEFT -->
       <div class="left-panel">
-
-        <!-- Stats -->
         <div class="stats-bar">
           <div class="stat-cell"><div class="stat-val" id="s-today">0</div><div class="stat-lbl">Aujourd'hui</div></div>
           <div class="stat-cell"><div class="stat-val">~3 min</div><div class="stat-lbl">Temps moyen</div></div>
           <div class="stat-cell"><div class="stat-val" id="s-saved">0 min</div><div class="stat-lbl">Économisé</div></div>
         </div>
-
-        <!-- Patient -->
         <div>
           <div class="section-head">
             <span class="section-title">Patient</span>
@@ -281,10 +353,18 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
               <select id="f-sex"><option value="">—</option><option>Masculin</option><option>Féminin</option></select>
             </div>
           </div>
-          <div class="field"><label>Antécédents (optionnel)</label><textarea id="f-history" placeholder="HTA, diabète T2, allergie pénicilline…"></textarea></div>
+          <div class="field-grid">
+            <div class="field">
+              <label>Langue</label>
+              <select id="f-lang"><option value="fr">🇫🇷 Français</option><option value="ar">🇹🇳 Arabe</option><option value="en">🇬🇧 Anglais</option></select>
+            </div>
+            <div class="field">
+              <label>Modèle</label>
+              <select id="f-template"><option value="standard">Standard</option><option value="cardio">Cardiologie</option><option value="dermato">Dermatologie</option><option value="pediatrie">Pédiatrie</option><option value="urgences">Urgences</option></select>
+            </div>
+          </div>
+          <div class="field"><label>Antécédents (optionnel)</label><textarea id="f-history" placeholder="HTA, diabète T2…"></textarea></div>
         </div>
-
-        <!-- Recorder -->
         <div>
           <div class="section-head">
             <span class="section-title">Dictée vocale</span>
@@ -308,22 +388,15 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
             </div>
           </div>
         </div>
-
-        <!-- Generate -->
         <button class="btn-generate" id="gen-btn" disabled onclick="generateReport()">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8h14M10 3l5 5-5 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Générer le compte-rendu IA
         </button>
-
-        <!-- History today -->
         <div id="history-today" style="display:none">
           <div class="section-head"><span class="section-title">Consultations du jour</span></div>
           <div class="history-rows" id="history-today-list"></div>
         </div>
-
       </div>
-
-      <!-- RIGHT -->
       <div class="right-panel">
         <div class="report-header">
           <span class="report-header-title">Compte-rendu médical</span>
@@ -335,46 +408,31 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
               <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M7 3h12l5 5v15a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2z" stroke="#3a4458" stroke-width="1.5"/><path d="M17 3v7h7M8 13h10M8 17h7M8 9h4" stroke="#3a4458" stroke-width="1.5" stroke-linecap="round"/></svg>
             </div>
             <div class="empty-title">Aucun compte-rendu</div>
-            <div class="empty-sub">Renseignez le patient, dictez la consultation, puis générez.</div>
+            <div class="empty-sub">Renseignez le patient, dictez, puis générez.</div>
           </div>
           <div id="report-body" style="display:none"></div>
         </div>
         <div class="report-footer" id="report-footer">
-          <button class="btn-sm" onclick="copyReport()">
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 9V2.5A1.5 1.5 0 013.5 1H9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-            Copier
-          </button>
-          <button class="btn-sm" onclick="exportPDF()">
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2h7l3 3v6.5A1.5 1.5 0 0110.5 13h-8A1.5 1.5 0 011 11.5v-8A1.5 1.5 0 012 2z" stroke="currentColor" stroke-width="1.2"/><path d="M8 2v4h4M4.5 8h4M4.5 10h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-            Compte-rendu PDF
-          </button>
-          <button class="btn-sm green" onclick="exportOrdonnance()">
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 2h7l3 3v6.5A1.5 1.5 0 0110.5 13h-8A1.5 1.5 0 011 11.5v-8A1.5 1.5 0 012 2z" stroke="currentColor" stroke-width="1.2"/><path d="M4 6h5M4 8.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-            Ordonnance
-          </button>
+          <button class="btn-sm" onclick="copyReport()">Copier</button>
+          <button class="btn-sm" onclick="exportPDF()">Compte-rendu PDF</button>
+          <button class="btn-sm green" onclick="exportOrdonnance()">Ordonnance</button>
           <button class="btn-sm primary" onclick="newConsult()">Nouveau</button>
         </div>
       </div>
-
     </div>
   </div>
 
-  <!-- ══ PAGE : HISTORIQUE ══ -->
+  <!-- PAGE HISTORIQUE -->
   <div class="page" id="page-history">
     <div class="history-page">
-      <div class="section-head" style="margin-bottom:1.5rem">
-        <span class="section-title">Toutes les consultations</span>
-      </div>
-      <div id="history-full-list">
-        <div class="history-empty">Aucune consultation enregistrée pour le moment.</div>
-      </div>
+      <div class="section-head" style="margin-bottom:1.5rem"><span class="section-title">Toutes les consultations</span></div>
+      <div id="history-full-list"><p style="color:var(--text3);font-size:13px">Aucune consultation enregistrée.</p></div>
     </div>
   </div>
 
-  <!-- ══ PAGE : PARAMÈTRES ══ -->
+  <!-- PAGE PARAMÈTRES -->
   <div class="page" id="page-settings">
     <div class="settings-page">
-
       <div class="settings-section">
         <div class="settings-title">Profil du médecin</div>
         <div class="settings-grid">
@@ -386,40 +444,99 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
         <div class="field" style="margin-bottom:16px"><label>Adresse du cabinet</label><input type="text" id="doc-address" placeholder="123 rue de la Santé, Tunis"></div>
         <button class="btn-save" onclick="saveDoctorProfile()">Sauvegarder le profil</button>
       </div>
-
       <div class="settings-section">
         <div class="settings-title">Préférences</div>
         <div class="settings-grid">
-          <div class="field">
-            <label>Langue du compte-rendu</label>
-            <select id="f-lang">
-              <option value="fr">🇫🇷 Français</option>
-              <option value="ar">🇹🇳 Arabe</option>
-              <option value="en">🇬🇧 Anglais</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Modèle par défaut</label>
-            <select id="f-template">
-              <option value="standard">Standard</option>
-              <option value="cardio">Cardiologie</option>
-              <option value="dermato">Dermatologie</option>
-              <option value="pediatrie">Pédiatrie</option>
-              <option value="urgences">Urgences</option>
-            </select>
-          </div>
+          <div class="field"><label>Langue par défaut</label><select id="pref-lang"><option value="fr">🇫🇷 Français</option><option value="ar">🇹🇳 Arabe</option><option value="en">🇬🇧 Anglais</option></select></div>
+          <div class="field"><label>Modèle par défaut</label><select id="pref-template"><option value="standard">Standard</option><option value="cardio">Cardiologie</option><option value="dermato">Dermatologie</option><option value="pediatrie">Pédiatrie</option><option value="urgences">Urgences</option></select></div>
         </div>
-        <button class="btn-save" onclick="savePreferences()">Sauvegarder les préférences</button>
+        <button class="btn-save" onclick="savePreferences()">Sauvegarder</button>
       </div>
-
+      <div class="settings-section">
+        <div class="settings-title">Compte</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Connecté en tant que : <span id="settings-email" style="color:var(--blue)"></span></p>
+        <button class="btn-save" style="background:var(--red)" onclick="logout()">Se déconnecter</button>
+      </div>
     </div>
   </div>
-
 </main>
 
 <div class="toast" id="toast"></div>
 
 <script>
+// ── SUPABASE ──
+const SUPABASE_URL = 'https://zxnvewwzbkvikluwndgj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_NQZd3ELJDg1BMO44uuTmhA_673xyidR';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── AUTH ──
+async function login(){
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+  const btn   = document.getElementById('login-btn');
+  const err   = document.getElementById('login-error');
+  err.classList.remove('show');
+  if(!email||!pass){err.textContent='Remplissez tous les champs';err.classList.add('show');return;}
+  btn.disabled=true;btn.textContent='Connexion…';
+  const {data,error} = await sb.auth.signInWithPassword({email,password:pass});
+  if(error){err.textContent=error.message;err.classList.add('show');btn.disabled=false;btn.textContent='Se connecter';return;}
+  showApp(data.user);
+}
+
+async function signup(){
+  const name  = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pass  = document.getElementById('signup-password').value;
+  const btn   = document.getElementById('signup-btn');
+  const err   = document.getElementById('signup-error');
+  const suc   = document.getElementById('signup-success');
+  err.classList.remove('show');suc.classList.remove('show');
+  if(!name||!email||!pass){err.textContent='Remplissez tous les champs';err.classList.add('show');return;}
+  if(pass.length<8){err.textContent='Mot de passe : 8 caractères minimum';err.classList.add('show');return;}
+  btn.disabled=true;btn.textContent='Création…';
+  const {data,error} = await sb.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
+  if(error){err.textContent=error.message;err.classList.add('show');btn.disabled=false;btn.textContent='Créer mon compte';return;}
+  suc.textContent='Compte créé ! Vérifiez votre email pour confirmer.';suc.classList.add('show');
+  btn.disabled=false;btn.textContent='Créer mon compte';
+}
+
+async function logout(){
+  await sb.auth.signOut();
+  document.getElementById('main-app').classList.remove('active');
+  document.getElementById('sidebar').style.display='none';
+  showLogin();
+}
+
+function showLogin(){
+  document.getElementById('auth-signup').classList.remove('active');
+  document.getElementById('auth-login').classList.add('active');
+}
+function showSignup(){
+  document.getElementById('auth-login').classList.remove('active');
+  document.getElementById('auth-signup').classList.add('active');
+}
+
+function showApp(user){
+  document.getElementById('auth-login').classList.remove('active');
+  document.getElementById('auth-signup').classList.remove('active');
+  document.getElementById('sidebar').style.display='flex';
+  document.getElementById('main-app').classList.add('active');
+  const name = user.user_metadata?.full_name || user.email.split('@')[0];
+  const email = user.email;
+  document.getElementById('sidebar-doc-name').textContent = name;
+  document.getElementById('sidebar-user-email').textContent = email;
+  document.getElementById('settings-email').textContent = email;
+  document.getElementById('avatar-initials').textContent = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  loadDoctorProfile();
+  loadPreferences();
+  initApp();
+}
+
+// Check session on load
+sb.auth.getSession().then(({data:{session}})=>{
+  if(session) showApp(session.user);
+});
+
 // ── NAVIGATION ──
 function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -430,21 +547,22 @@ function showPage(name){
   document.getElementById('page-title').textContent=titles[name]||name;
 }
 
-// ── INIT ──
-const BARS=40;
-const waveEl=document.getElementById('wave-container');
-for(let i=0;i<BARS;i++){const b=document.createElement('div');b.className='wave-bar';b.id='wb'+i;waveEl.appendChild(b);}
-
-document.getElementById('topbar-date').textContent=
-  new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-
-loadDoctorProfile();
-loadPreferences();
+// ── INIT APP ──
+function initApp(){
+  const BARS=40;
+  const waveEl=document.getElementById('wave-container');
+  if(!waveEl.children.length){
+    for(let i=0;i<BARS;i++){const b=document.createElement('div');b.className='wave-bar';b.id='wb'+i;waveEl.appendChild(b);}
+  }
+  document.getElementById('topbar-date').textContent=
+    new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+}
 
 // ── STATE ──
 let isRec=false,recog=null,timerInt=null,waveInt=null;
 let seconds=0,transcript='',reportCount=0,historyList=[];
-let savedMinutes=0,interimText='';
+let savedMinutes=0;
+const BARS=40;
 
 // ── SPEECH RECOGNITION ──
 function buildRecognition(){
@@ -464,10 +582,7 @@ function buildRecognition(){
     document.getElementById('transcript-wrap').classList.add('show');
     document.getElementById('transcript-text').textContent=(transcript+interim).trim();
   };
-  r.onerror=err=>{
-    if(err.error==='not-allowed') toast('Microphone refusé — autorisez dans Chrome');
-    else if(err.error!=='no-speech') toast('Erreur : '+err.error);
-  };
+  r.onerror=err=>{if(err.error==='not-allowed') toast('Microphone refusé');else if(err.error!=='no-speech') toast('Erreur : '+err.error);};
   r.onend=()=>{if(isRec) try{r.start()}catch{}};
   return r;
 }
@@ -493,13 +608,16 @@ function startRec(){
     document.getElementById('rec-timer').textContent=
       String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
   },1000);
-  waveInt=setInterval(animWave,90);
+  waveInt=setInterval(()=>{
+    for(let i=0;i<BARS;i++){const b=document.getElementById('wb'+i);if(b){b.style.height=(Math.random()*26+4)+'px';b.classList.add('active');}}
+  },90);
 }
 
 function stopRec(){
   isRec=false;
   if(recog) try{recog.stop()}catch{}
-  clearInterval(timerInt);clearInterval(waveInt);resetWave();
+  clearInterval(timerInt);clearInterval(waveInt);
+  for(let i=0;i<BARS;i++){const b=document.getElementById('wb'+i);if(b){b.style.height='6px';b.classList.remove('active');}}
   document.getElementById('rec-timer').style.display='none';
   const final=(transcript||document.getElementById('transcript-text').textContent).trim();
   if(!final){toast('Aucune parole détectée');setRecState('idle');document.getElementById('mode-label').textContent='Prêt';return;}
@@ -518,24 +636,10 @@ function setRecState(s){
     recording:`<svg viewBox="0 0 22 22" fill="none"><rect x="6" y="6" width="10" height="10" rx="2" fill="#f43f5e"/></svg>`,
     done:`<svg viewBox="0 0 22 22" fill="none"><path d="M5 11l4 4 8-8" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
   };
-  btn.className='rec-circle '+s;
-  btn.innerHTML=icons[s]||icons.idle;
+  btn.className='rec-circle '+s;btn.innerHTML=icons[s]||icons.idle;
   if(s==='recording'){status.textContent='Enregistrement…';sub.textContent='Cliquez pour arrêter';}
   else if(s==='done'){status.textContent='Dictée terminée';sub.textContent='Transcription complète — prêt à générer';}
   else{status.textContent='Prêt à enregistrer';sub.textContent='Cliquez sur le micro pour commencer';}
-}
-
-function animWave(){
-  for(let i=0;i<BARS;i++){
-    const b=document.getElementById('wb'+i);
-    if(b){b.style.height=(Math.random()*26+4)+'px';b.classList.add('active');}
-  }
-}
-function resetWave(){
-  for(let i=0;i<BARS;i++){
-    const b=document.getElementById('wb'+i);
-    if(b){b.style.height='6px';b.classList.remove('active');}
-  }
 }
 
 // ── GENERATE ──
@@ -548,21 +652,12 @@ async function generateReport(){
   const type=document.getElementById('f-type').value;
   const lang=document.getElementById('f-lang')?.value||'fr';
   const template=document.getElementById('f-template')?.value||'standard';
-
   const btn=document.getElementById('gen-btn');
   btn.classList.add('loading');btn.innerHTML='<div class="spin"></div> Génération…';
   document.getElementById('report-empty').style.display='none';
   const body=document.getElementById('report-body');body.style.display='block';
-
   const today=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
-  body.innerHTML=`
-    <div class="report-meta-row">
-      <span class="meta-pill highlight">👤 ${name}${age!=='—'?', '+age+' ans':''}</span>
-      <span class="meta-pill">${sex}</span><span class="meta-pill">${type}</span><span class="meta-pill">${today}</span>
-    </div>
-    <div class="edit-hint"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 9l2-2 6-6 2 2-6 6-2.5.5.5-2.5z" stroke="currentColor" stroke-width="1.2"/></svg> Cliquez sur une section pour la modifier</div>
-    <div id="sections-container"></div>`;
-
+  body.innerHTML=`<div class="report-meta-row"><span class="meta-pill highlight">👤 ${name}${age!=='—'?', '+age+' ans':''}</span><span class="meta-pill">${sex}</span><span class="meta-pill">${type}</span><span class="meta-pill">${today}</span></div><div class="edit-hint"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 9l2-2 6-6 2 2-6 6-2.5.5.5-2.5z" stroke="currentColor" stroke-width="1.2"/></svg> Cliquez sur une section pour modifier</div><div id="sections-container"></div>`;
   const sections=[
     {key:'motif',label:'Motif de consultation',accent:''},
     {key:'anamnese',label:'Anamnèse',accent:''},
@@ -571,24 +666,15 @@ async function generateReport(){
     {key:'traitement',label:'Traitement & prescriptions',accent:'accent-green'},
     {key:'suivi',label:'Suivi & recommandations',accent:''},
   ];
-
   const cont=document.getElementById('sections-container');
   sections.forEach((s,i)=>{
-    const d=document.createElement('div');
-    d.className='rsection';d.id='rs-'+s.key;d.style.transitionDelay=(i*0.07)+'s';
+    const d=document.createElement('div');d.className='rsection';d.id='rs-'+s.key;d.style.transitionDelay=(i*0.07)+'s';
     d.innerHTML=`<div class="rsection-label">${s.label}</div><div class="rsection-body ${s.accent}" id="rb-${s.key}" contenteditable="true" title="Cliquez pour modifier"><span class="cursor"></span></div>`;
-    cont.appendChild(d);
-    setTimeout(()=>d.classList.add('visible'),i*70);
+    cont.appendChild(d);setTimeout(()=>d.classList.add('visible'),i*70);
   });
-
-  document.getElementById('r-chip').className='chip chip-amber';
-  document.getElementById('r-chip').textContent='Génération…';
-
+  document.getElementById('r-chip').className='chip chip-amber';document.getElementById('r-chip').textContent='Génération…';
   try{
-    const res=await fetch('/api/generate',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({transcript:liveTranscript,name,age,sex,type,lang,template})
-    });
+    const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transcript:liveTranscript,name,age,sex,type,lang,template})});
     if(!res.ok) throw new Error('HTTP '+res.status);
     const data=await res.json();
     if(data.error) throw new Error(data.error);
@@ -600,20 +686,16 @@ async function generateReport(){
       const parsed=JSON.parse(match?match[0]:clean);
       const norm=v=>!v?'Non mentionné':typeof v==='string'?v:typeof v==='object'?Object.entries(v).map(([k,val])=>`${k} : ${val}`).join('\n'):String(v);
       report={motif:norm(parsed.motif),anamnese:norm(parsed.anamnese),examen:norm(parsed.examen),conclusion:norm(parsed.conclusion),traitement:norm(parsed.traitement),suivi:norm(parsed.suivi)};
-    }catch{report=fallback(liveTranscript,type);}
+    }catch{report={motif:'Non mentionné',anamnese:liveTranscript,examen:'Non mentionné',conclusion:'Non mentionné',traitement:'Non mentionné',suivi:'Non mentionné'};}
     for(const s of sections) await stream('rb-'+s.key,report[s.key]||'Non mentionné');
   }catch(e){
-    console.error(e);
-    const r=fallback(liveTranscript,type);
+    const r={motif:`Consultation de ${type.toLowerCase()}.`,anamnese:liveTranscript,examen:'Non mentionné',conclusion:'Non mentionné',traitement:'Non mentionné',suivi:'Réévaluation selon évolution.'};
     for(const s of sections) await stream('rb-'+s.key,r[s.key]);
-    toast('Mode local — vérifiez la connexion');
+    toast('Mode local actif');
   }
-
-  btn.classList.remove('loading');
-  btn.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8h14M10 3l5 5-5 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Générer le compte-rendu IA';
+  btn.classList.remove('loading');btn.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8h14M10 3l5 5-5 5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Générer le compte-rendu IA';
   btn.disabled=false;
-  document.getElementById('r-chip').className='chip chip-green';
-  document.getElementById('r-chip').textContent='✓ Généré';
+  document.getElementById('r-chip').className='chip chip-green';document.getElementById('r-chip').textContent='✓ Généré';
   document.getElementById('report-footer').classList.add('show');
   reportCount++;savedMinutes+=35;
   document.getElementById('s-today').textContent=reportCount;
@@ -623,61 +705,22 @@ async function generateReport(){
 }
 
 async function stream(id,text){
-  const el=document.getElementById(id);
-  if(!el) return;
-  el.textContent='';
+  const el=document.getElementById(id);if(!el) return;el.textContent='';
   const words=text.split(' ');
-  for(let i=0;i<words.length;i++){
-    await new Promise(r=>setTimeout(r,16));
-    el.textContent+=(i===0?'':' ')+words[i];
-  }
-}
-
-function fallback(text,type){
-  return{
-    motif:`Consultation de ${(type||'médecine générale').toLowerCase()}.`,
-    anamnese:text,
-    examen:'Non mentionné',
-    conclusion:'Diagnostic à établir.',
-    traitement:'Traitement à préciser.',
-    suivi:'Réévaluation selon évolution.'
-  };
+  for(let i=0;i<words.length;i++){await new Promise(r=>setTimeout(r,16));el.textContent+=(i===0?'':' ')+words[i];}
 }
 
 // ── HISTORY ──
 function addHistory(name,type,dictee){
   const t=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-  historyList.unshift({name,type,time:t,dictee,date:new Date().toLocaleDateString('fr-FR')});
-  renderHistoryToday();
-  renderHistoryFull();
-}
-
-function renderHistoryToday(){
+  historyList.unshift({name,type,time:t,date:new Date().toLocaleDateString('fr-FR')});
   const sec=document.getElementById('history-today');
   const list=document.getElementById('history-today-list');
-  if(historyList.length===0){sec.style.display='none';return;}
-  sec.style.display='block';
-  list.innerHTML=historyList.slice(0,5).map(h=>`
-    <div class="history-row">
-      <span style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></span>
-      <span class="hist-name-col">${h.name}</span>
-      <span class="hist-type-col">${h.type}</span>
-      <span class="hist-time-col">${h.time}</span>
-    </div>`).join('');
-}
-
-function renderHistoryFull(){
-  const list=document.getElementById('history-full-list');
-  if(historyList.length===0){
-    list.innerHTML='<div class="history-empty">Aucune consultation enregistrée pour le moment.</div>';return;
+  if(historyList.length>0){
+    sec.style.display='block';
+    list.innerHTML=historyList.slice(0,5).map(h=>`<div class="history-row"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></span><span class="hist-name-col">${h.name}</span><span class="hist-type-col">${h.type}</span><span class="hist-time-col">${h.time}</span></div>`).join('');
   }
-  list.innerHTML=historyList.map(h=>`
-    <div class="history-row" style="margin-bottom:8px">
-      <span style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></span>
-      <span class="hist-name-col">${h.name}</span>
-      <span class="hist-type-col">${h.type}</span>
-      <span class="hist-time-col">${h.date} ${h.time}</span>
-    </div>`).join('');
+  document.getElementById('history-full-list').innerHTML=historyList.map(h=>`<div class="history-row" style="margin-bottom:8px"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></span><span class="hist-name-col">${h.name}</span><span class="hist-type-col">${h.type}</span><span class="hist-time-col">${h.date} ${h.time}</span></div>`).join('');
 }
 
 // ── ACTIONS ──
@@ -691,9 +734,7 @@ function copyReport(){
   navigator.clipboard.writeText(txt).then(()=>toast('Copié !'));
 }
 
-function getDoctorProfile(){
-  try{return JSON.parse(localStorage.getItem('doctorProfile')||'{}');}catch{return {};}
-}
+function getDoctorProfile(){try{return JSON.parse(localStorage.getItem('doctorProfile')||'{}');}catch{return {};}}
 
 function exportPDF(){
   const doc=getDoctorProfile();
@@ -702,139 +743,31 @@ function exportPDF(){
   const pd=document.getElementById('f-dob')?.value||'';
   const ps=document.getElementById('f-sex')?.value||'';
   const ct=document.getElementById('f-type')?.value||'Médecine générale';
-  const dn=doc.name||'Dr. Médecin';
-  const ds=doc.spec||ct;
-  const dt=doc.tel||'—';
-  const dr=doc.rpps||'—';
-  const da=doc.addr||'—';
+  const dn=doc.name||document.getElementById('sidebar-doc-name')?.textContent||'Dr. Médecin';
+  const ds=doc.spec||ct;const dt=doc.tel||'—';const dr=doc.rpps||'—';const da=doc.addr||'—';
   const get=id=>{const el=document.getElementById('rb-'+id);return el?el.textContent.trim():'';};
   const today=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
   const num='CR-'+Date.now().toString().slice(-6);
-
-  const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Compte-rendu — ${pn}</title>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;color:#1c2333;background:white;width:210mm;min-height:297mm}
-.page{width:210mm;min-height:297mm;padding:14mm 16mm 12mm;display:flex;flex-direction:column}
-.header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;border-bottom:2.5px solid #1c2333;margin-bottom:18px}
-.doc-name{font-family:'EB Garamond',serif;font-size:22px;font-weight:600;letter-spacing:-0.3px}
-.doc-detail{font-size:11px;color:#5a6478;margin-top:3px;line-height:1.6}
-.hdr-right{text-align:right}
-.hdr-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#8a93a8}
-.hdr-date{font-size:13px;font-weight:600;color:#1c2333;margin-top:4px}
-.patient-bar{background:#f4f6fb;border-radius:8px;padding:10px 16px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:20px}
-.pcell label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#8a93a8;display:block;margin-bottom:2px}
-.pcell span{font-size:13px;font-weight:600;color:#1c2333}
-.section{margin-bottom:16px}
-.slabel{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#8a93a8;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.slabel::after{content:'';flex:1;height:1px;background:#e8ebf2}
-.sbody{font-size:12.5px;line-height:1.75;color:#2c3444;padding:10px 14px;border-radius:6px;background:#fafbfd;border:1px solid #eaecf4}
-.sbody.blue{border-left:3px solid #3182ce;background:#f7faff}
-.sbody.red{border-left:3px solid #e53e3e;background:#fff8f8}
-.rxbox{border:1.5px solid #1c2333;border-radius:8px;padding:14px 16px;margin-bottom:16px}
-.rxhead{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.rxsym{font-family:'EB Garamond',serif;font-size:28px;font-weight:600;line-height:1}
-.footer{margin-top:auto;padding-top:16px;border-top:1px solid #e8ebf2;display:flex;justify-content:space-between;align-items:flex-end}
-.sigline{width:180px;border-top:1px solid #1c2333;margin-bottom:6px}
-.siglabel{font-size:10px;color:#8a93a8}
-.finfo{font-size:9.5px;color:#aab0bc;text-align:right;line-height:1.6}
-.conf{font-size:8.5px;color:#c8cdd8;margin-top:16px;text-align:center;font-style:italic}
-@media print{html,body{width:210mm;height:297mm}}
-</style></head><body>
-<div class="page">
-  <div class="header">
-    <div><div class="doc-name">${dn}</div><div class="doc-detail">${ds}<br>${da}<br>Tél : ${dt} • N° RPPS : ${dr}</div></div>
-    <div class="hdr-right"><div class="hdr-label">Compte-rendu médical</div><div class="hdr-date">${today}</div><div style="font-size:10px;color:#aab0bc;margin-top:2px">Réf. ${num}</div></div>
-  </div>
-  <div class="patient-bar">
-    <div class="pcell"><label>Patient</label><span>${pn}</span></div>
-    ${pd?`<div class="pcell"><label>Né(e) le</label><span>${pd}</span></div>`:''}
-    ${pa?`<div class="pcell"><label>Âge</label><span>${pa} ans</span></div>`:''}
-    ${ps?`<div class="pcell"><label>Sexe</label><span>${ps}</span></div>`:''}
-    <div class="pcell"><label>Spécialité</label><span>${ct}</span></div>
-  </div>
-  <div class="section"><div class="slabel">Motif de consultation</div><div class="sbody">${get('motif')}</div></div>
-  <div class="section"><div class="slabel">Anamnèse</div><div class="sbody">${get('anamnese')}</div></div>
-  <div class="section"><div class="slabel">Examen clinique</div><div class="sbody blue">${get('examen')}</div></div>
-  <div class="section"><div class="slabel">Conclusion diagnostique</div><div class="sbody red">${get('conclusion')}</div></div>
-  <div class="rxbox"><div class="rxhead"><div class="rxsym">℞</div><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#5a6478">Traitement & Prescriptions</div></div><div style="font-size:13px;line-height:1.85;color:#1c2333">${get('traitement')}</div></div>
-  <div class="section"><div class="slabel">Suivi & Recommandations</div><div class="sbody">${get('suivi')}</div></div>
-  <div class="footer">
-    <div><div class="sigline"></div><div class="siglabel">Signature & Cachet du médecin</div></div>
-    <div class="finfo">Document généré par MedScribe Pro<br>${today} • Réf. ${num}</div>
-  </div>
-  <div class="conf">Document médical confidentiel — usage strictement médical</div>
-</div>
-<script>window.onload=()=>{window.print();}<\/script>
-</body></html>`;
+  const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Compte-rendu</title><link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'DM Sans',sans-serif;color:#1c2333;background:white;width:210mm;min-height:297mm}.page{width:210mm;min-height:297mm;padding:14mm 16mm 12mm;display:flex;flex-direction:column}.header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;border-bottom:2.5px solid #1c2333;margin-bottom:18px}.doc-name{font-family:'EB Garamond',serif;font-size:22px;font-weight:600}.doc-detail{font-size:11px;color:#5a6478;margin-top:3px;line-height:1.6}.hdr-right{text-align:right}.hdr-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#8a93a8}.hdr-date{font-size:13px;font-weight:600;color:#1c2333;margin-top:4px}.patient-bar{background:#f4f6fb;border-radius:8px;padding:10px 16px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:20px}.pcell label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#8a93a8;display:block;margin-bottom:2px}.pcell span{font-size:13px;font-weight:600;color:#1c2333}.section{margin-bottom:16px}.slabel{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#8a93a8;margin-bottom:6px;display:flex;align-items:center;gap:8px}.slabel::after{content:'';flex:1;height:1px;background:#e8ebf2}.sbody{font-size:12.5px;line-height:1.75;color:#2c3444;padding:10px 14px;border-radius:6px;background:#fafbfd;border:1px solid #eaecf4}.sbody.blue{border-left:3px solid #3182ce;background:#f7faff}.sbody.red{border-left:3px solid #e53e3e;background:#fff8f8}.rxbox{border:1.5px solid #1c2333;border-radius:8px;padding:14px 16px;margin-bottom:16px}.rxhead{display:flex;align-items:center;gap:8px;margin-bottom:10px}.rxsym{font-family:'EB Garamond',serif;font-size:28px;font-weight:600;line-height:1}.footer{margin-top:auto;padding-top:16px;border-top:1px solid #e8ebf2;display:flex;justify-content:space-between;align-items:flex-end}.sigline{width:180px;border-top:1px solid #1c2333;margin-bottom:6px}.siglabel{font-size:10px;color:#8a93a8}.finfo{font-size:9.5px;color:#aab0bc;text-align:right;line-height:1.6}.conf{font-size:8.5px;color:#c8cdd8;margin-top:16px;text-align:center;font-style:italic}@media print{html,body{width:210mm;height:297mm}}</style></head><body><div class="page"><div class="header"><div><div class="doc-name">${dn}</div><div class="doc-detail">${ds}<br>${da}<br>Tél : ${dt} • N° RPPS : ${dr}</div></div><div class="hdr-right"><div class="hdr-label">Compte-rendu médical</div><div class="hdr-date">${today}</div><div style="font-size:10px;color:#aab0bc;margin-top:2px">Réf. ${num}</div></div></div><div class="patient-bar"><div class="pcell"><label>Patient</label><span>${pn}</span></div>${pd?`<div class="pcell"><label>Né(e) le</label><span>${pd}</span></div>`:''} ${pa?`<div class="pcell"><label>Âge</label><span>${pa} ans</span></div>`:''} ${ps?`<div class="pcell"><label>Sexe</label><span>${ps}</span></div>`:''}<div class="pcell"><label>Spécialité</label><span>${ct}</span></div></div><div class="section"><div class="slabel">Motif de consultation</div><div class="sbody">${get('motif')}</div></div><div class="section"><div class="slabel">Anamnèse</div><div class="sbody">${get('anamnese')}</div></div><div class="section"><div class="slabel">Examen clinique</div><div class="sbody blue">${get('examen')}</div></div><div class="section"><div class="slabel">Conclusion diagnostique</div><div class="sbody red">${get('conclusion')}</div></div><div class="rxbox"><div class="rxhead"><div class="rxsym">℞</div><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#5a6478">Traitement & Prescriptions</div></div><div style="font-size:13px;line-height:1.85;color:#1c2333">${get('traitement')}</div></div><div class="section"><div class="slabel">Suivi & Recommandations</div><div class="sbody">${get('suivi')}</div></div><div class="footer"><div><div class="sigline"></div><div class="siglabel">Signature & Cachet</div></div><div class="finfo">MedScribe Pro<br>${today} • Réf. ${num}</div></div><div class="conf">Document médical confidentiel</div></div><script>window.onload=()=>{window.print();}<\/script></body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();
 }
 
 function exportOrdonnance(){
   const doc=getDoctorProfile();
-  const dn=doc.name||'Dr. Médecin';
-  const ds=doc.spec||'Médecine générale';
-  const dt=doc.tel||'—';
-  const dr=doc.rpps||'—';
-  const da=doc.addr||'—';
+  const dn=doc.name||document.getElementById('sidebar-doc-name')?.textContent||'Dr. Médecin';
+  const ds=doc.spec||'Médecine générale';const dt=doc.tel||'—';const dr=doc.rpps||'—';const da=doc.addr||'—';
   const pn=document.getElementById('f-name')?.value||'Patient';
-  const pa=document.getElementById('f-age')?.value||'';
-  const pd=document.getElementById('f-dob')?.value||'';
-  const ct=document.getElementById('f-type')?.value||'Médecine générale';
+  const pa=document.getElementById('f-age')?.value||'';const pd=document.getElementById('f-dob')?.value||'';
   const traitement=document.getElementById('rb-traitement')?.textContent?.trim()||'';
   const today=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
   const num='ORD-'+Date.now().toString().slice(-6);
   const lines=traitement.split(/[.\n;]/).map(l=>l.trim()).filter(l=>l.length>3);
   const rxItems=lines.map((l,i)=>`<div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #eef0f5;align-items:flex-start"><div style="width:22px;height:22px;border-radius:50%;background:#1c2333;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${i+1}</div><div style="font-size:14px;line-height:1.6;color:#1c2333">${l}</div></div>`).join('');
-
-  const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ordonnance — ${pn}</title>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:#fff;color:#1c2333;width:210mm;min-height:297mm}
-.page{width:210mm;min-height:297mm;padding:14mm 16mm 12mm;display:flex;flex-direction:column}
-.header{display:flex;justify-content:space-between;padding-bottom:14px;border-bottom:3px solid #1c2333;margin-bottom:20px}
-.doc-name{font-family:'EB Garamond',serif;font-size:24px;font-weight:600;letter-spacing:-0.3px}
-.doc-detail{font-size:11px;color:#5a6478;margin-top:3px}
-.hdr-right{text-align:right}
-.patient-box{background:#f4f6fb;border-radius:8px;padding:12px 16px;margin-bottom:24px;display:flex;gap:24px;flex-wrap:wrap}
-.pf label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#8a93a8;display:block;margin-bottom:2px}
-.pf span{font-size:13px;font-weight:600;color:#1c2333}
-.rxhead{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.rxsym{font-family:'EB Garamond',serif;font-size:52px;font-weight:600;color:#1c2333;line-height:1}
-.footer{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;padding-top:20px;border-top:1px solid #e8ebf2}
-.sigline{width:200px;border-top:1.5px solid #1c2333;margin-bottom:6px}
-.siglabel{font-size:10px;color:#8a93a8}
-.stamp{width:110px;height:110px;border:1.5px dashed #c8cdd8;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#c8cdd8;text-align:center}
-.note{font-size:9px;color:#c8cdd8;text-align:center;margin-top:20px;font-style:italic}
-@media print{body,html{width:210mm;height:297mm}}
-</style></head><body>
-<div class="page">
-  <div class="header">
-    <div><div class="doc-name">${dn}</div><div class="doc-detail">${ds} • ${da}</div><div class="doc-detail">Tél : ${dt} • N° RPPS : ${dr}</div></div>
-    <div class="hdr-right"><div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#8a93a8">Ordonnance médicale</div><div style="font-size:13px;font-weight:600;color:#1c2333;margin-top:4px">${today}</div><div style="font-size:10px;color:#aab0bc;margin-top:2px">Réf. ${num}</div></div>
-  </div>
-  <div class="patient-box">
-    <div class="pf"><label>Patient</label><span>${pn}</span></div>
-    ${pa?`<div class="pf"><label>Âge</label><span>${pa} ans</span></div>`:''}
-    ${pd?`<div class="pf"><label>Né(e) le</label><span>${pd}</span></div>`:''}
-    <div class="pf"><label>Date</label><span>${today}</span></div>
-  </div>
-  <div class="rxhead">
-    <div class="rxsym">℞</div>
-    <div><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#5a6478">Prescriptions médicales</div><div style="font-size:12px;color:#8a93a8;margin-top:2px">À délivrer en pharmacie sur présentation de cette ordonnance</div></div>
-  </div>
-  <div style="flex:1">${rxItems||'<div style="font-size:14px;color:#5a6478;padding:16px 0">Aucune prescription renseignée</div>'}</div>
-  <div class="footer"><div><div class="sigline"></div><div class="siglabel">Signature du médecin</div></div><div class="stamp">Cachet<br>du médecin</div></div>
-  <div class="note">Ordonnance valable 3 mois • Document médical confidentiel</div>
-</div>
-<script>window.onload=()=>{window.print();}<\/script>
-</body></html>`;
+  const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ordonnance</title><link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'DM Sans',sans-serif;background:#fff;color:#1c2333;width:210mm;min-height:297mm}.page{width:210mm;min-height:297mm;padding:14mm 16mm 12mm;display:flex;flex-direction:column}.header{display:flex;justify-content:space-between;padding-bottom:14px;border-bottom:3px solid #1c2333;margin-bottom:20px}.doc-name{font-family:'EB Garamond',serif;font-size:24px;font-weight:600}.doc-detail{font-size:11px;color:#5a6478;margin-top:3px}.patient-box{background:#f4f6fb;border-radius:8px;padding:12px 16px;margin-bottom:24px;display:flex;gap:24px;flex-wrap:wrap}.pf label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#8a93a8;display:block;margin-bottom:2px}.pf span{font-size:13px;font-weight:600;color:#1c2333}.rxhead{display:flex;align-items:center;gap:12px;margin-bottom:20px}.rxsym{font-family:'EB Garamond',serif;font-size:52px;font-weight:600;color:#1c2333;line-height:1}.footer{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;padding-top:20px;border-top:1px solid #e8ebf2}.sigline{width:200px;border-top:1.5px solid #1c2333;margin-bottom:6px}.siglabel{font-size:10px;color:#8a93a8}.stamp{width:110px;height:110px;border:1.5px dashed #c8cdd8;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#c8cdd8;text-align:center}.note{font-size:9px;color:#c8cdd8;text-align:center;margin-top:20px;font-style:italic}@media print{body,html{width:210mm;height:297mm}}</style></head><body><div class="page"><div class="header"><div><div class="doc-name">${dn}</div><div class="doc-detail">${ds} • ${da}</div><div class="doc-detail">Tél : ${dt} • N° RPPS : ${dr}</div></div><div style="text-align:right"><div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#8a93a8">Ordonnance médicale</div><div style="font-size:13px;font-weight:600;color:#1c2333;margin-top:4px">${today}</div><div style="font-size:10px;color:#aab0bc;margin-top:2px">Réf. ${num}</div></div></div><div class="patient-box"><div class="pf"><label>Patient</label><span>${pn}</span></div>${pa?`<div class="pf"><label>Âge</label><span>${pa} ans</span></div>`:''} ${pd?`<div class="pf"><label>Né(e) le</label><span>${pd}</span></div>`:''}<div class="pf"><label>Date</label><span>${today}</span></div></div><div class="rxhead"><div class="rxsym">℞</div><div><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#5a6478">Prescriptions médicales</div><div style="font-size:12px;color:#8a93a8;margin-top:2px">À délivrer en pharmacie</div></div></div><div style="flex:1">${rxItems||'<div style="font-size:14px;color:#5a6478;padding:16px 0">Aucune prescription</div>'}</div><div class="footer"><div><div class="sigline"></div><div class="siglabel">Signature du médecin</div></div><div class="stamp">Cachet<br>du médecin</div></div><div class="note">Ordonnance valable 3 mois • Document médical confidentiel</div></div><script>window.onload=()=>{window.print();}<\/script></body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();
 }
 
-// ── DOCTOR PROFILE ──
+// ── PROFIL & PREFS ──
 function saveDoctorProfile(){
   localStorage.setItem('doctorProfile',JSON.stringify({
     name:document.getElementById('doc-name')?.value||'',
@@ -844,31 +777,23 @@ function saveDoctorProfile(){
     addr:document.getElementById('doc-address')?.value||''
   }));
   const n=document.getElementById('doc-name')?.value;
-  const s=document.getElementById('doc-spec')?.value;
   if(n){document.getElementById('sidebar-doc-name').textContent=n;document.getElementById('avatar-initials').textContent=n.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();}
-  if(s) document.getElementById('sidebar-doc-spec').textContent=s;
   toast('Profil sauvegardé ✓');
 }
-
 function loadDoctorProfile(){
   try{
     const p=JSON.parse(localStorage.getItem('doctorProfile')||'{}');
-    if(p.name){document.getElementById('doc-name').value=p.name;document.getElementById('sidebar-doc-name').textContent=p.name;document.getElementById('avatar-initials').textContent=p.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();}
-    if(p.spec){document.getElementById('doc-spec').value=p.spec;document.getElementById('sidebar-doc-spec').textContent=p.spec;}
-    if(p.tel) document.getElementById('doc-tel').value=p.tel;
+    if(p.name) document.getElementById('doc-name').value=p.name;
+    if(p.spec) document.getElementById('doc-spec').value=p.spec;
+    if(p.tel)  document.getElementById('doc-tel').value=p.tel;
     if(p.rpps) document.getElementById('doc-rpps').value=p.rpps;
     if(p.addr) document.getElementById('doc-address').value=p.addr;
   }catch{}
 }
-
 function savePreferences(){
-  localStorage.setItem('medscribePrefs',JSON.stringify({
-    lang:document.getElementById('f-lang')?.value||'fr',
-    template:document.getElementById('f-template')?.value||'standard'
-  }));
+  localStorage.setItem('medscribePrefs',JSON.stringify({lang:document.getElementById('pref-lang')?.value||'fr',template:document.getElementById('pref-template')?.value||'standard'}));
   toast('Préférences sauvegardées ✓');
 }
-
 function loadPreferences(){
   try{
     const p=JSON.parse(localStorage.getItem('medscribePrefs')||'{}');
@@ -876,8 +801,6 @@ function loadPreferences(){
     if(p.template) document.getElementById('f-template').value=p.template;
   }catch{}
 }
-
-// ── MISC ──
 function newConsult(){
   clearForm();
   document.getElementById('report-empty').style.display='flex';
@@ -890,20 +813,9 @@ function newConsult(){
   document.getElementById('gen-btn').disabled=true;
   setRecState('idle');transcript='';
   document.getElementById('mode-label').textContent='Prêt';
-  toast('Nouvelle consultation');
 }
-
-function clearForm(){
-  ['f-name','f-dob','f-age','f-history'].forEach(id=>{
-    const el=document.getElementById(id);if(el) el.value='';
-  });
-}
-
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
-}
+function clearForm(){['f-name','f-dob','f-age','f-history'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 </script>
 </body>
 </html>
